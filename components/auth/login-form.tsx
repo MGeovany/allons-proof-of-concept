@@ -1,48 +1,47 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
-import { ChevronLeft, Eye, EyeOff } from 'lucide-react'
-import { loginWithEmail, loginWithGoogle } from '@/lib/auth-actions'
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { loginWithEmail, loginWithGoogle } from "@/lib/auth-actions";
 
 export function LoginForm() {
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const searchParams = useSearchParams()
-  const registered = searchParams.get('registered') === '1'
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered") === "1";
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true)
-    setError(null)
-    const result = await loginWithEmail(formData)
+    setLoading(true);
+    setError(null);
+    const result = await loginWithEmail(formData);
     if (result?.error) {
-      setError(result.error)
-      setLoading(false)
+      setError(result.error);
+      setLoading(false);
     }
   }
 
   async function handleGoogle() {
-    setLoading(true)
-    setError(null)
-    const result = await loginWithGoogle()
+    setLoading(true);
+    setError(null);
+    const result = await loginWithGoogle();
     if (result?.error) {
-      setError(result.error)
-      setLoading(false)
+      setError(result.error);
+      setLoading(false);
     }
   }
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col py-2">
       <Link
         href="/"
-        className="flex w-fit items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition-opacity hover:bg-white/15 active:opacity-80"
+        className="flex w-fit items-center gap-2 rounded-full bg-white/10 px-3 py-3 text-sm font-semibold text-white transition-opacity hover:bg-white/15 active:opacity-80"
         aria-label="Volver"
       >
         <ChevronLeft className="h-5 w-5 shrink-0" />
-        <span>Volver</span>
       </Link>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-10">
@@ -73,7 +72,7 @@ export function LoginForm() {
           <div className="relative">
             <input
               name="password"
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               placeholder="Contrasena"
               required
               className="w-full rounded-lg bg-input pr-12 pl-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
@@ -82,7 +81,9 @@ export function LoginForm() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
-              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              aria-label={
+                showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+              }
             >
               {showPassword ? (
                 <EyeOff className="h-6 w-6" strokeWidth={2} aria-hidden />
@@ -102,7 +103,7 @@ export function LoginForm() {
               disabled={loading}
               className="flex w-full max-w-[18rem] items-center justify-center rounded-2xl bg-orange-primary py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
-              {loading ? 'Cargando...' : 'Continuar'}
+              {loading ? "Cargando..." : "Continuar"}
             </button>
             <button
               type="button"
@@ -136,12 +137,15 @@ export function LoginForm() {
 
       <div className="flex flex-col items-center gap-2 pb-10 pt-6">
         <p className="text-sm text-muted-foreground">
-          {'No tienes una cuenta? '}
-          <Link href="/auth/register" className="font-semibold text-orange-primary hover:underline">
+          {"No tienes una cuenta? "}
+          <Link
+            href="/auth/register"
+            className="font-semibold text-orange-primary hover:underline"
+          >
             Registrarme
           </Link>
         </p>
       </div>
     </div>
-  )
+  );
 }

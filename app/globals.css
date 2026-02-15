@@ -48,4 +48,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Asteriscos/bullets más grandes solo cuando hay texto (el placeholder no cambia) */
+  input[type='password']:not(:placeholder-shown) {
+    font-size: 1.25rem;
+    letter-spacing: 0.2em;
+  }
 }
