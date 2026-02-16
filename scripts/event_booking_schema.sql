@@ -10,15 +10,20 @@
 -- Schema solo para esta app (la otra app sigue usando public.profiles)
 create schema if not exists event_booking;
 
--- Perfiles de usuarios de esta app (id, name, username desde auth)
+-- Perfiles de usuarios de esta app (id, name, username, intereses desde auth)
 create table if not exists event_booking.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   name text,
   username text,
+  interests text[] default '{}',
   created_at timestamptz default now()
 );
 
 alter table event_booking.profiles enable row level security;
+
+drop policy if exists "event_booking_profiles_select_own" on event_booking.profiles;
+drop policy if exists "event_booking_profiles_insert_own" on event_booking.profiles;
+drop policy if exists "event_booking_profiles_update_own" on event_booking.profiles;
 
 create policy "event_booking_profiles_select_own"
   on event_booking.profiles for select
@@ -62,14 +67,66 @@ create trigger on_auth_user_created_event_booking
   for each row
   execute function event_booking.handle_new_user();
 
+-- Reservas: a nombre del usuario (user_id), por evento
+create table if not exists event_booking.reservations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  event_id text not null,
+  quantity int not null default 1,
+  ticket_holder_name text,
+  created_at timestamptz default now(),
+  unique(user_id, event_id)
+);
+
+alter table event_booking.reservations enable row level security;
+
+drop policy if exists "event_booking_reservations_select_own" on event_booking.reservations;
+drop policy if exists "event_booking_reservations_insert_own" on event_booking.reservations;
+drop policy if exists "event_booking_reservations_update_own" on event_booking.reservations;
+drop policy if exists "event_booking_reservations_delete_own" on event_booking.reservations;
+
+create policy "event_booking_reservations_select_own"
+  on event_booking.reservations for select
+  using (auth.uid() = user_id);
+
+create policy "event_booking_reservations_insert_own"
+  on event_booking.reservations for insert
+  with check (auth.uid() = user_id);
+
+create policy "event_booking_reservations_update_own"
+  on event_booking.reservations for update
+  using (auth.uid() = user_id);
+
+create policy "event_booking_reservations_delete_own"
+  on event_booking.reservations for delete
+  using (auth.uid() = user_id);
+
+-- Exponer el schema en la API (evita "Invalid schema: event_booking")
+-- Ver también: Dashboard → Project Settings → API → Exposed schemas → añadir "event_booking"
+grant usage on schema event_booking to anon, authenticated, service_role;
+grant all on all tables in schema event_booking to anon, authenticated, service_role;
+grant all on all routines in schema event_booking to anon, authenticated, service_role;
+grant all on all sequences in schema event_booking to anon, authenticated, service_role;
+alter default privileges for role postgres in schema event_booking
+  grant all on tables to anon, authenticated, service_role;
+alter default privileges for role postgres in schema event_booking
+  grant all on routines to anon, authenticated, service_role;
+alter default privileges for role postgres in schema event_booking
+  grant all on sequences to anon, authenticated, service_role;
+alter role authenticator set pgrst.db_schemas = 'public, event_booking';
+
+-- Si ya tenías el schema sin interests, ejecuta solo:
+-- alter table event_booking.profiles add column if not exists interests text[] default '{}';
 
 -- =============================================================================
 -- BORRAR: Ejecutar este bloque cuando quieras quitar solo esta app (deja intacta
 --         la DB de la otra app en public)
 -- =============================================================================
 /*
+alter role authenticator reset pgrst.db_schemas;
 drop trigger if exists on_auth_user_created_event_booking on auth.users;
 drop function if exists event_booking.handle_new_user();
+drop table if exists event_booking.reservations;
 drop table if exists event_booking.profiles;
 drop schema if exists event_booking cascade;
 */

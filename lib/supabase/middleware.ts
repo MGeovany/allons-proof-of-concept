@@ -52,13 +52,22 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is logged in and tries to access auth pages, redirect to home
+  // If user is logged in and tries to access auth pages, redirect to home or interests
   const authPaths = ['/', '/auth/login', '/auth/register']
   const isAuthPath = authPaths.includes(request.nextUrl.pathname)
 
   if (isAuthPath && user) {
+    const { data: profile } = await supabase
+      .schema('event_booking')
+      .from('profiles')
+      .select('interests')
+      .eq('id', user.id)
+      .single()
     const url = request.nextUrl.clone()
-    url.pathname = '/home'
+    url.pathname =
+      !profile?.interests || profile.interests.length === 0
+        ? '/interests'
+        : '/home'
     return NextResponse.redirect(url)
   }
 

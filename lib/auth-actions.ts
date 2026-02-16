@@ -18,6 +18,20 @@ export async function loginWithEmail(formData: FormData) {
     return { error: error.message }
   }
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user) {
+    const { data: profile } = await supabase
+      .schema('event_booking')
+      .from('profiles')
+      .select('interests')
+      .eq('id', user.id)
+      .single()
+    if (!profile?.interests || profile.interests.length === 0) {
+      redirect('/interests')
+    }
+  }
   redirect('/home')
 }
 
@@ -92,9 +106,17 @@ export async function saveInterests(interests: string[]) {
   }
 
   const { error } = await supabase
+    .schema('event_booking')
     .from('profiles')
-    .update({ interests })
-    .eq('id', user.id)
+    .upsert(
+      {
+        id: user.id,
+        interests,
+        name: user.user_metadata?.name ?? undefined,
+        username: user.user_metadata?.username ?? undefined,
+      },
+      { onConflict: 'id' },
+    )
 
   if (error) {
     return { error: error.message }

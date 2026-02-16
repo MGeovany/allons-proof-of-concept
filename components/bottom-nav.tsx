@@ -15,7 +15,7 @@ export function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="sticky bottom-0 z-50 mx-4 mb-4 rounded-2xl bg-primary px-2 py-2">
+    <nav className="sticky bottom-0 z-50 mx-4 mb-4 rounded-2xl bg-orange-primary px-2 py-2">
       <div className="flex items-center justify-around">
         {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href
@@ -25,8 +25,8 @@ export function BottomNav() {
               href={href}
               className={`flex flex-col items-center gap-0.5 rounded-xl px-4 py-1.5 transition-colors ${
                 isActive
-                  ? 'text-primary-foreground'
-                  : 'text-primary-foreground/60'
+                  ? 'text-white'
+                  : 'text-white/70'
               }`}
               aria-label={label}
             >

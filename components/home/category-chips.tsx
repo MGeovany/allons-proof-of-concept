@@ -25,7 +25,7 @@ export function CategoryChips() {
             onClick={() => setActive(active === cat ? null : cat)}
             className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
               active === cat
-                ? 'border-primary bg-primary text-primary-foreground'
+                ? 'border-orange-primary bg-orange-primary text-white'
                 : 'border-border bg-secondary text-foreground'
             }`}
           >
