@@ -94,7 +94,10 @@ export async function loginWithGoogle() {
   }
 }
 
-export async function saveInterests(interests: string[]) {
+export async function saveInterests(
+  interests: string[],
+  redirectTo?: string,
+) {
   const supabase = await createClient()
 
   const {
@@ -122,7 +125,7 @@ export async function saveInterests(interests: string[]) {
     return { error: error.message }
   }
 
-  redirect('/home')
+  redirect(redirectTo ?? '/home')
 }
 
 export async function signOut() {

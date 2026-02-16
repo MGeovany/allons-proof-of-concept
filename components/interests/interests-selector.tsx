@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { saveInterests } from "@/lib/auth-actions";
 import Image from "next/image";
 
@@ -27,10 +27,11 @@ const INTEREST_OPTIONS = [
 ];
 
 export function InterestsSelector() {
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? undefined;
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
-  const router = useRouter();
 
   function toggleInterest(interest: string) {
     setSelected((prev) =>
@@ -45,7 +46,7 @@ export function InterestsSelector() {
     setLoading(true);
     setShowLoading(true);
 
-    const result = await saveInterests(selected);
+    const result = await saveInterests(selected, redirectTo);
     if (result?.error) {
       setLoading(false);
       setShowLoading(false);
