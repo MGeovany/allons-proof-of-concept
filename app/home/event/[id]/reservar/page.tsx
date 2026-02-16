@@ -43,9 +43,9 @@ export default function ReservarPage() {
   const isCancel = quantity === 0
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
       {/* Header */}
-      <header className="flex shrink-0 items-center gap-3 px-4 py-4">
+      <header className="flex shrink-0 items-center gap-3 px-4 py-3">
         <button
           type="button"
           onClick={() => router.back()}
@@ -60,7 +60,8 @@ export default function ReservarPage() {
         <div className="w-10 shrink-0" aria-hidden />
       </header>
 
-      <div className="flex flex-1 flex-col px-4 pb-6">
+      <div className="flex min-h-0 flex-1 flex-col justify-between px-4 py-3 pb-5">
+        <div className="flex flex-col gap-3">
         {/* Card selección de entradas */}
         <div className="rounded-2xl bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-4">
@@ -94,15 +95,13 @@ export default function ReservarPage() {
           </div>
         </div>
 
-        <p className="mt-4 text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Reservas disponibles hasta el {event.reserveUntil}
         </p>
-
-        {/* Espacio para empujar el resumen abajo */}
-        <div className="flex-1" />
+        </div>
 
         {/* Resumen y botón */}
-        <div className="mt-6 flex flex-col gap-4">
+        <div className="flex shrink-0 flex-col gap-3 pt-2">
           {!isCancel && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-foreground">{event.displayDateTime}</span>

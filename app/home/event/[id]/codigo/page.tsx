@@ -63,7 +63,7 @@ export default function CodigoAccesoPage() {
   const ticketHolderName = reservation.ticket_holder_name ?? "Invitado";
 
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-background">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
       {/* Fondo con gradiente suave como el diseño */}
       <div
         className="pointer-events-none absolute inset-0 opacity-90"
@@ -74,7 +74,7 @@ export default function CodigoAccesoPage() {
         aria-hidden
       />
 
-      <header className="relative z-10 flex shrink-0 items-center justify-between px-4 pt-6">
+      <header className="relative z-10 flex shrink-0 items-center justify-between px-4 pt-4 pb-2">
         <button
           type="button"
           onClick={() => router.back()}
@@ -96,20 +96,22 @@ export default function CodigoAccesoPage() {
         </button>
       </header>
 
-      <div className="relative z-10 flex flex-1 flex-col items-center px-4 pb-8">
-        <p className="mt-4 text-sm font-medium text-foreground">
-          Entrada general
-        </p>
-        <p className="mt-2 text-sm text-foreground">{ticketHolderName}</p>
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-between px-4 py-3 pb-6">
+        <div className="flex shrink-0 flex-col items-center">
+          <p className="text-sm font-medium text-foreground">Entrada general</p>
+          <p className="mt-1 text-sm text-foreground">{ticketHolderName}</p>
+        </div>
+
+        <div className="flex min-h-0 w-full flex-1 items-center justify-center py-2">
 
         {/* QR en círculo naranja - imagen proporcionada */}
-        <div className="mt-8 flex h-[400px] w-[400px] items-center justify-center rounded-full bg-orange-primary">
+        <div className="flex aspect-square w-full max-w-[280px] flex-shrink-0 items-center justify-center rounded-full bg-orange-primary">
           {/* 
             Truco para que se vea como en Figma (QR blanco sobre naranja):
             - convertimos el PNG a blanco/negro con filters
             - y usamos blend-mode screen para que el fondo negro “desaparezca” sobre el naranja
           */}
-          <div className="relative h-[250px] w-[250px]">
+          <div className="relative h-[62%] w-[62%]">
             <Image
               src="/images/qr-code.png"
               alt="Código QR de acceso"
@@ -119,13 +121,16 @@ export default function CodigoAccesoPage() {
             />
           </div>
         </div>
+        </div>
 
-        <p className="mt-7 text-center text-sm font-medium text-foreground">
-          {event.title}
-        </p>
-        <p className="mt-8 max-w-[260px] text-center text-sm font-semibold text-foreground">
-          Muestra este código QR al encargado en el evento para ingresar.
-        </p>
+        <div className="flex shrink-0 flex-col items-center gap-1">
+          <p className="text-center text-sm font-medium text-foreground">
+            {event.title}
+          </p>
+          <p className="max-w-[260px] text-center text-xs font-semibold text-foreground">
+            Muestra este código QR al encargado en el evento para ingresar.
+          </p>
+        </div>
       </div>
     </div>
   );
