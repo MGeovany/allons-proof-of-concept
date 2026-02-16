@@ -2,6 +2,7 @@
 const PROVIDER_EMAILS = [
   'marlongeo1999@gmail.com',
   'marlongeo1999+pro@gmail.com',
+  'allonsapp@outlook.com',
 ] as const
 
 export function isProviderEmail(email: string | undefined): boolean {

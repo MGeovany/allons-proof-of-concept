@@ -123,7 +123,7 @@ alter table event_booking.profiles add column if not exists role text default 'u
 -- Asignar rol proveedor a los correos autorizados
 update event_booking.profiles
 set role = 'provider'
-where id in (select id from auth.users where email in ('marlongeo1999@gmail.com', 'marlongeo1999+pro@gmail.com'));
+where id in (select id from auth.users where email in ('marlongeo1999@gmail.com', 'marlongeo1999+pro@gmail.com', 'allonsapp@outlook.com'));
 
 notify pgrst, 'reload schema';
 
@@ -140,5 +140,5 @@ drop table if exists event_booking.profiles;
 drop schema if exists event_booking cascade;
 -- Nota: si ya ejecutaste el schema antes, para añadir role ejecuta solo:
 -- alter table event_booking.profiles add column if not exists role text default 'user';
--- update event_booking.profiles set role = 'provider' where id in (select id from auth.users where email in ('marlongeo1999@gmail.com', 'marlongeo1999+pro@gmail.com'));
+-- update event_booking.profiles set role = 'provider' where id in (select id from auth.users where email in ('marlongeo1999@gmail.com', 'marlongeo1999+pro@gmail.com', 'allonsapp@outlook.com'));
 */
