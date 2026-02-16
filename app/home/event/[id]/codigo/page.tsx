@@ -61,6 +61,9 @@ export default function CodigoAccesoPage() {
   }
 
   const ticketHolderName = reservation.ticket_holder_name ?? "Invitado";
+  const quantity = reservation.quantity ?? 1;
+  const quantityLabel =
+    quantity === 1 ? "1 entrada" : `${quantity} entradas`;
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
@@ -87,19 +90,20 @@ export default function CodigoAccesoPage() {
           <span className="block">Código de</span>
           <span className="block">Acceso</span>
         </h1>
-        <button
-          type="button"
+        <Link
+          href={`/home/event/${event.id}`}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-black"
-          aria-label="Información"
+          aria-label="Ver detalles del evento"
         >
           <Info className="h-5 w-5" />
-        </button>
+        </Link>
       </header>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-between px-4 py-3 pb-6">
         <div className="flex shrink-0 flex-col items-center">
           <p className="text-sm font-medium text-foreground">Entrada general</p>
           <p className="mt-1 text-sm text-foreground">{ticketHolderName}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{quantityLabel}</p>
         </div>
 
         <div className="flex min-h-0 w-full flex-1 items-center justify-center py-2">

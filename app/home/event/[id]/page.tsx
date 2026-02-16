@@ -200,21 +200,22 @@ export default function EventDetailPage() {
               </p>
             )}
 
-            {/* Reseñas del organizador - scroll horizontal */}
+            {/* Reseñas del organizador - scroll horizontal con swipe en móvil */}
             <h3 className="mb-3 text-sm font-semibold text-foreground">
               Reseñas del organizador
             </h3>
             <motion.div
-              className="flex gap-3 overflow-x-auto pb-24 scrollbar-none"
+              className="flex gap-3 overflow-x-auto overflow-y-hidden pb-24 scrollbar-none snap-x snap-mandatory"
               initial="initial"
               animate="animate"
               variants={staggerContainer}
+              style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
             >
               {event.reviews.map((review, i) => (
                 <motion.div
                   key={i}
                   variants={staggerItem}
-                  className="flex w-64 shrink-0 flex-col gap-2 rounded-xl bg-secondary/80 p-4"
+                  className="flex w-64 shrink-0 snap-start flex-col gap-2 rounded-xl bg-secondary/80 p-4"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-primary/25 text-sm font-semibold text-orange-primary">
