@@ -125,7 +125,10 @@ export async function saveInterests(
     return { error: error.message }
   }
 
-  redirect(redirectTo ?? '/home')
+  if (redirectTo) {
+    return { redirectTo }
+  }
+  redirect('/home')
 }
 
 export async function signOut() {

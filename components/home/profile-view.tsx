@@ -1,42 +1,67 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Clock, LogOut, TicketIcon } from 'lucide-react'
+import { Clock, LogOut, TicketIcon, User } from 'lucide-react'
 import { signOut } from '@/lib/auth-actions'
 
-const DEFAULT_LOCATION = 'San Pedro Sula'
 const PLACEHOLDER_AVATAR = '/placeholder-user.jpg'
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
+  return name.slice(0, 2).toUpperCase() || '?'
+}
 
 export function ProfileView({
   displayName,
+  email,
+  location,
   interests,
   avatarUrl,
 }: {
   displayName: string
+  email: string
+  location: string
   interests: string[]
   avatarUrl?: string | null
 }) {
+  const [imgError, setImgError] = useState(false)
   const src = avatarUrl || PLACEHOLDER_AVATAR
+  const showFallback = imgError || !src
 
   return (
     <>
       {/* Tarjeta usuario */}
       <div className="rounded-2xl bg-secondary p-4">
         <div className="flex gap-4">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-muted">
-            <Image
-              src={src}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="64px"
-            />
+          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+            {showFallback ? (
+              <span className="flex h-full w-full items-center justify-center bg-orange-primary/20 text-lg font-semibold text-orange-primary">
+                {getInitials(displayName)}
+              </span>
+            ) : (
+              <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover object-center"
+                sizes="64px"
+                onError={() => setImgError(true)}
+                unoptimized={avatarUrl?.includes('googleusercontent') ?? false}
+              />
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-bold text-foreground">{displayName}</h2>
+            {email ? (
+              <p className="mt-0.5 text-sm text-muted-foreground">{email}</p>
+            ) : null}
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {DEFAULT_LOCATION}
+              {location}
             </p>
             {interests.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">

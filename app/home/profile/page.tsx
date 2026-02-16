@@ -20,6 +20,8 @@ export default async function ProfilePage() {
   const displayName =
     profile?.name ?? (user.user_metadata?.name as string) ?? 'Invitado'
   const interests = profile?.interests ?? []
+  const location = 'San Pedro Sula'
+  const email = user.email ?? ''
   const avatarUrl =
     (user.user_metadata?.avatar_url as string) ??
     (user.user_metadata?.picture as string) ??
@@ -76,6 +78,8 @@ export default async function ProfilePage() {
 
       <ProfileView
         displayName={displayName}
+        email={email}
+        location={location}
         interests={interests}
         avatarUrl={avatarUrl}
       />

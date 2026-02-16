@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { saveInterests } from "@/lib/auth-actions";
 import Image from "next/image";
 
@@ -26,9 +26,14 @@ const INTEREST_OPTIONS = [
   "Bares & drinks",
 ];
 
-export function InterestsSelector() {
+type Props = {
+  redirectTo?: string;
+};
+
+export function InterestsSelector({ redirectTo: redirectFromServer }: Props = {}) {
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") ?? undefined;
+  const redirectTo = redirectFromServer ?? searchParams.get("redirect") ?? undefined;
+  const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -52,7 +57,8 @@ export function InterestsSelector() {
       setShowLoading(false);
       return;
     }
-    // redirect happens in server action
+    const target = result?.redirectTo ?? redirectTo ?? '/home';
+    router.push(target);
   }
 
   if (showLoading) {
