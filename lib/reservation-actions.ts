@@ -69,3 +69,21 @@ export async function hasReservationForEvent(eventId: string): Promise<boolean> 
   const r = await getReservationForEvent(eventId)
   return !!r
 }
+
+export async function cancelReservation(eventId: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Debes iniciar sesión' }
+
+  const { error } = await supabase
+    .schema('event_booking')
+    .from('reservations')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('event_id', eventId)
+
+  if (error) return { error: error.message }
+  return {}
+}

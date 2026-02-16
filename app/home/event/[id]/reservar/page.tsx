@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Minus, Plus } from 'lucide-react'
 import { getEventById } from '@/lib/events'
-import { createReservation } from '@/lib/reservation-actions'
+import { createReservation, cancelReservation, getReservationForEvent } from '@/lib/reservation-actions'
 
 function formatPrice(amount: number) {
   return `L. ${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
@@ -15,7 +15,15 @@ export default function ReservarPage() {
   const params = useParams()
   const router = useRouter()
   const [quantity, setQuantity] = useState(1)
+  const [loading, setLoading] = useState(false)
   const event = getEventById(params.id as string)
+
+  useEffect(() => {
+    if (!event?.id) return
+    getReservationForEvent(event.id).then((r) => {
+      if (r?.quantity != null) setQuantity(r.quantity)
+    })
+  }, [event?.id])
 
   if (!event) {
     return (
@@ -32,6 +40,7 @@ export default function ReservarPage() {
   }
 
   const total = event.price * quantity
+  const isCancel = quantity === 0
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -64,7 +73,7 @@ export default function ReservarPage() {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                onClick={() => setQuantity((q) => Math.max(0, q - 1))}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-neutral-700 transition-colors hover:bg-neutral-100"
                 aria-label="Menos"
               >
@@ -94,25 +103,44 @@ export default function ReservarPage() {
 
         {/* Resumen y botón */}
         <div className="mt-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-foreground">{event.displayDateTime}</span>
-            <span className="font-semibold text-foreground">
-              {formatPrice(total)}
-            </span>
-          </div>
+          {!isCancel && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-foreground">{event.displayDateTime}</span>
+              <span className="font-semibold text-foreground">
+                {formatPrice(total)}
+              </span>
+            </div>
+          )}
           <button
             type="button"
+            disabled={loading}
             onClick={async () => {
-              const { error } = await createReservation(event.id, quantity)
-              if (error) {
-                alert(error)
-                return
+              setLoading(true)
+              if (isCancel) {
+                const { error } = await cancelReservation(event.id)
+                if (error) {
+                  alert(error)
+                  setLoading(false)
+                  return
+                }
+                router.push(`/home/event/${event.id}/reservar/cancelado`)
+              } else {
+                const { error } = await createReservation(event.id, quantity)
+                if (error) {
+                  alert(error)
+                  setLoading(false)
+                  return
+                }
+                router.push(`/home/event/${event.id}/reservar/success`)
               }
-              router.push(`/home/event/${event.id}/reservar/success`)
             }}
-            className="flex w-full items-center justify-center rounded-2xl bg-orange-primary py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90"
+            className={`flex w-full items-center justify-center rounded-2xl py-3.5 text-base font-semibold transition-opacity hover:opacity-90 ${
+              isCancel
+                ? 'border border-red-500 bg-transparent text-red-500 hover:bg-red-500/10'
+                : 'bg-orange-primary text-white'
+            }`}
           >
-            Reservar, Pago en el local
+            {isCancel ? 'Cancelar reserva' : 'Reservar, Pago en el local'}
           </button>
         </div>
       </div>
