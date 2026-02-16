@@ -3,10 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Clock, LogOut, TicketIcon, User } from 'lucide-react'
+import { Clock, LogOut, TicketIcon } from 'lucide-react'
 import { signOut } from '@/lib/auth-actions'
-
-const PLACEHOLDER_AVATAR = '/placeholder-user.jpg'
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/)
@@ -30,8 +28,8 @@ export function ProfileView({
   avatarUrl?: string | null
 }) {
   const [imgError, setImgError] = useState(false)
-  const src = avatarUrl || PLACEHOLDER_AVATAR
-  const showFallback = imgError || !src
+  const showImage = avatarUrl && !imgError
+  const showInitials = !showImage
 
   return (
     <>
@@ -39,19 +37,19 @@ export function ProfileView({
       <div className="rounded-2xl bg-secondary p-4">
         <div className="flex gap-4">
           <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
-            {showFallback ? (
+            {showInitials ? (
               <span className="flex h-full w-full items-center justify-center bg-orange-primary/20 text-lg font-semibold text-orange-primary">
                 {getInitials(displayName)}
               </span>
             ) : (
               <Image
-                src={src}
+                src={avatarUrl!}
                 alt=""
                 fill
                 className="object-cover object-center"
                 sizes="64px"
                 onError={() => setImgError(true)}
-                unoptimized={avatarUrl?.includes('googleusercontent') ?? false}
+                unoptimized={avatarUrl.includes('googleusercontent')}
               />
             )}
           </div>

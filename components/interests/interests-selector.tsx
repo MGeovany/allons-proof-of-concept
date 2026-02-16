@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { saveInterests } from "@/lib/auth-actions";
+import { useSearchParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 
 const INTEREST_OPTIONS = [
@@ -33,7 +33,6 @@ type Props = {
 export function InterestsSelector({ redirectTo: redirectFromServer }: Props = {}) {
   const searchParams = useSearchParams();
   const redirectTo = redirectFromServer ?? searchParams.get("redirect") ?? undefined;
-  const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -51,14 +50,54 @@ export function InterestsSelector({ redirectTo: redirectFromServer }: Props = {}
     setLoading(true);
     setShowLoading(true);
 
-    const result = await saveInterests(selected, redirectTo);
-    if (result?.error) {
+    const target = redirectTo ?? "/home";
+    console.log("[Interests] Guardando intereses:", selected);
+    console.log("[Interests] Redirección después de guardar:", target);
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.error("[Interests] No hay usuario logueado");
+        setLoading(false);
+        setShowLoading(false);
+        alert("No autenticado. Inicia sesión de nuevo.");
+        return;
+      }
+
+      const { error } = await supabase
+        .schema("event_booking")
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            interests: selected,
+            name: (user.user_metadata?.name as string) ?? undefined,
+            username: (user.user_metadata?.username as string) ?? undefined,
+          },
+          { onConflict: "id" }
+        );
+
+      if (error) {
+        console.error("[Interests] Error al guardar en DB:", error);
+        setLoading(false);
+        setShowLoading(false);
+        alert(`Error al guardar: ${error.message}`);
+        return;
+      }
+
+      console.log("[Interests] Guardado correcto en DB, redirigiendo a", target);
+      window.location.href = target;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Error al guardar";
+      console.error("[Interests] Excepción:", e);
       setLoading(false);
       setShowLoading(false);
-      return;
+      alert(message);
     }
-    const target = result?.redirectTo ?? redirectTo ?? '/home';
-    router.push(target);
   }
 
   if (showLoading) {

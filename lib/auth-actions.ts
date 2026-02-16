@@ -97,38 +97,40 @@ export async function loginWithGoogle() {
 export async function saveInterests(
   interests: string[],
   redirectTo?: string,
-) {
-  const supabase = await createClient()
+): Promise<{ error?: string; redirectTo?: string }> {
+  try {
+    const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  if (!user) {
-    return { error: 'No autenticado' }
+    if (!user) {
+      return { error: 'No autenticado' }
+    }
+
+    const { error } = await supabase
+      .schema('event_booking')
+      .from('profiles')
+      .upsert(
+        {
+          id: user.id,
+          interests: interests ?? [],
+          name: user.user_metadata?.name ?? undefined,
+          username: user.user_metadata?.username ?? undefined,
+        },
+        { onConflict: 'id' },
+      )
+
+    if (error) {
+      return { error: error.message }
+    }
+
+    return { redirectTo: redirectTo ?? '/home' }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Error al guardar'
+    return { error: message }
   }
-
-  const { error } = await supabase
-    .schema('event_booking')
-    .from('profiles')
-    .upsert(
-      {
-        id: user.id,
-        interests,
-        name: user.user_metadata?.name ?? undefined,
-        username: user.user_metadata?.username ?? undefined,
-      },
-      { onConflict: 'id' },
-    )
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  if (redirectTo) {
-    return { redirectTo }
-  }
-  redirect('/home')
 }
 
 export async function signOut() {

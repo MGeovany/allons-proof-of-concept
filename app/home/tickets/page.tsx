@@ -30,7 +30,7 @@ export default async function TicketsPage() {
       .filter(Boolean) ?? []
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background px-6 pt-6">
+    <div className="flex flex-1 flex-col bg-background px-6 pt-6 pb-4">
       {/* Header */}
       <header className="flex items-center justify-between">
         <Link

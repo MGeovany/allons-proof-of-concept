@@ -115,8 +115,9 @@ alter default privileges for role postgres in schema event_booking
   grant all on sequences to anon, authenticated, service_role;
 alter role authenticator set pgrst.db_schemas = 'public, event_booking';
 
--- Si ya tenías el schema sin interests, ejecuta solo:
--- alter table event_booking.profiles add column if not exists interests text[] default '{}';
+-- Asegurar columna interests (si la tabla se creó sin ella) y refrescar caché de la API
+alter table event_booking.profiles add column if not exists interests text[] default '{}';
+notify pgrst, 'reload schema';
 
 -- =============================================================================
 -- BORRAR: Ejecutar este bloque cuando quieras quitar solo esta app (deja intacta
