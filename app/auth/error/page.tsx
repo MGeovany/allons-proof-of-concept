@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from "next/link";
 
 export default function AuthErrorPage() {
   return (
@@ -11,10 +11,10 @@ export default function AuthErrorPage() {
       </p>
       <Link
         href="/"
-        className="rounded-full bg-primary px-8 py-3 font-semibold text-primary-foreground"
+        className="rounded-full px-8 py-3 font-semibold text-primary-foreground bg-orange-primary"
       >
         Volver al inicio
       </Link>
     </div>
-  )
+  );
 }
