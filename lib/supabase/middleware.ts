@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isProviderEmail } from '@/lib/provider-constants'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -60,11 +61,26 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Proveedores siempre van a /provider (no a /home ni /interests)
+  if (user && isProviderEmail(user.email ?? undefined)) {
+    const path = request.nextUrl.pathname
+    if (path.startsWith('/home') || path.startsWith('/interests')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/provider'
+      return NextResponse.redirect(url)
+    }
+  }
+
   // If user is logged in and tries to access auth pages, redirect to home or interests
   const authPaths = ['/', '/auth/login', '/auth/register']
   const isAuthPath = authPaths.includes(request.nextUrl.pathname)
 
   if (isAuthPath && user) {
+    if (isProviderEmail(user.email ?? undefined)) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/provider'
+      return NextResponse.redirect(url)
+    }
     const { data: profile } = await supabase
       .schema('event_booking')
       .from('profiles')

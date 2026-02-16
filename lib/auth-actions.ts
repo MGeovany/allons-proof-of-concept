@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { isProviderEmail } from '@/lib/provider-constants'
 
 export async function loginWithEmail(formData: FormData) {
   const supabase = await createClient()
@@ -22,6 +23,9 @@ export async function loginWithEmail(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser()
   if (user) {
+    if (isProviderEmail(user.email ?? undefined)) {
+      redirect('/provider')
+    }
     const { data: profile } = await supabase
       .schema('event_booking')
       .from('profiles')

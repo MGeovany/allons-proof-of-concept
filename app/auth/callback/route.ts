@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { isProviderEmail } from '@/lib/provider-constants'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -14,6 +15,9 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser()
       if (user) {
+        if (isProviderEmail(user.email ?? undefined)) {
+          return NextResponse.redirect(`${origin}/provider`)
+        }
         const { data: profile } = await supabase
           .schema('event_booking')
           .from('profiles')
