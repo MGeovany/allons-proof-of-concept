@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { loginWithEmail, loginWithGoogle } from "@/lib/auth-actions";
+import { loginAsProvider } from "@/lib/provider-actions";
 
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
@@ -13,11 +14,14 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered") === "1";
+  const asProvider = searchParams.get("as") === "provider";
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError(null);
-    const result = await loginWithEmail(formData);
+    const result = asProvider
+      ? await loginAsProvider(formData)
+      : await loginWithEmail(formData);
     if (result?.error) {
       setError(result.error);
       setLoading(false);
@@ -55,7 +59,12 @@ export function LoginForm() {
           />
         </div>
 
-        {registered && (
+        {asProvider && (
+          <p className="w-full rounded-lg border border-border bg-muted/50 px-4 py-3 text-center text-sm text-muted-foreground">
+            Acceso para proveedores. Solo el correo autorizado puede entrar.
+          </p>
+        )}
+        {registered && !asProvider && (
           <p className="w-full rounded-lg bg-orange-primary/15 px-4 py-3 text-center text-sm text-orange-primary">
             Revisa tu correo para confirmar tu cuenta y luego inicia sesión.
           </p>
@@ -103,8 +112,9 @@ export function LoginForm() {
               disabled={loading}
               className="flex w-full max-w-[18rem] items-center justify-center rounded-2xl bg-orange-primary py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
-              {loading ? "Cargando..." : "Continuar"}
+              {loading ? "Cargando..." : asProvider ? "Entrar como proveedor" : "Continuar"}
             </button>
+            {!asProvider && (
             <button
               type="button"
               onClick={handleGoogle}
@@ -131,6 +141,7 @@ export function LoginForm() {
               </svg>
               Continuar con Google
             </button>
+            )}
           </div>
         </form>
       </div>
@@ -145,6 +156,14 @@ export function LoginForm() {
             Registrarme
           </Link>
         </p>
+        <Link
+          href={asProvider ? "/auth/login" : "/auth/login?as=provider"}
+          className="text-sm text-muted-foreground hover:underline"
+        >
+          {asProvider
+            ? "Iniciar sesión como usuario"
+            : "Iniciar sesión como proveedor"}
+        </Link>
       </div>
     </div>
   );

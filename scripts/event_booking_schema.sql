@@ -10,12 +10,13 @@
 -- Schema solo para esta app (la otra app sigue usando public.profiles)
 create schema if not exists event_booking;
 
--- Perfiles de usuarios de esta app (id, name, username, intereses desde auth)
+-- Perfiles de usuarios de esta app (id, name, username, intereses, role desde auth)
 create table if not exists event_booking.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   name text,
   username text,
   interests text[] default '{}',
+  role text default 'user',
   created_at timestamptz default now()
 );
 
@@ -115,8 +116,15 @@ alter default privileges for role postgres in schema event_booking
   grant all on sequences to anon, authenticated, service_role;
 alter role authenticator set pgrst.db_schemas = 'public, event_booking';
 
--- Asegurar columna interests (si la tabla se creó sin ella) y refrescar caché de la API
+-- Asegurar columnas opcionales si la tabla se creó antes
 alter table event_booking.profiles add column if not exists interests text[] default '{}';
+alter table event_booking.profiles add column if not exists role text default 'user';
+
+-- Asignar rol proveedor al correo autorizado
+update event_booking.profiles
+set role = 'provider'
+where id = (select id from auth.users where email = 'marlongeo1999@gmail.com');
+
 notify pgrst, 'reload schema';
 
 -- =============================================================================
@@ -130,4 +138,7 @@ drop function if exists event_booking.handle_new_user();
 drop table if exists event_booking.reservations;
 drop table if exists event_booking.profiles;
 drop schema if exists event_booking cascade;
+-- Nota: si ya ejecutaste el schema antes, para añadir role ejecuta solo:
+-- alter table event_booking.profiles add column if not exists role text default 'user';
+-- update event_booking.profiles set role = 'provider' where id = (select id from auth.users where email = 'marlongeo1999@gmail.com');
 */
