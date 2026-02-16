@@ -11,6 +11,9 @@ const urbanist = Urbanist({
 export const metadata: Metadata = {
   title: 'Allons - Descubre eventos cerca de ti',
   description: 'Encuentra y reserva los mejores eventos cerca de ti',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export const viewport: Viewport = {
