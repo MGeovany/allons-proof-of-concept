@@ -36,7 +36,7 @@ export default function ContactarProveedorPage() {
   const email = event.providerContacts?.email;
 
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-background">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
       <div
         className="pointer-events-none absolute inset-0 opacity-90"
         style={{
@@ -46,7 +46,7 @@ export default function ContactarProveedorPage() {
         aria-hidden
       />
 
-      <header className="relative z-10 flex shrink-0 items-center justify-between px-4 pt-6">
+      <header className="relative z-10 flex shrink-0 items-center justify-between px-4 pt-4 pb-2">
         <button
           type="button"
           onClick={() => router.back()}
@@ -61,10 +61,10 @@ export default function ContactarProveedorPage() {
         <div className="h-10 w-10" aria-hidden />
       </header>
 
-      <main className="relative z-10 flex flex-1 flex-col px-6 pt-10">
-        <h2 className="text-xl font-semibold text-foreground">Canales</h2>
+      <main className="relative z-10 flex min-h-0 flex-1 flex-col px-6 pt-5 pb-6">
+        <h2 className="text-lg font-semibold text-foreground">Canales</h2>
 
-        <div className="mt-8 flex flex-col gap-6">
+        <div className="mt-5 flex flex-col gap-4">
           {instagram && (
             <a
               href={`https://instagram.com/${instagram}`}
