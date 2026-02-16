@@ -1,24 +1,19 @@
-import Image from 'next/image'
-import Link from 'next/link'
+import Image from "next/image";
+import Link from "next/link";
 
 interface EventCardProps {
-  id: string
-  title: string
-  date: string
-  day: string
-  image: string
+  id: string;
+  title: string;
+  date: string;
+  day: string;
+  image: string;
 }
 
 export function EventCard({ id, title, date, day, image }: EventCardProps) {
   return (
-    <div className="flex w-44 shrink-0 flex-col overflow-hidden rounded-xl">
+    <div className="flex w-48 shrink-0 flex-col overflow-hidden rounded-xl">
       <div className="relative h-40">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className="object-cover"
-        />
+        <Image src={image} alt={title} fill className="object-cover" />
         <div className="absolute left-2 top-2 flex flex-col items-center rounded-lg bg-background/80 px-2 py-1 backdrop-blur-sm">
           <span className="text-[10px] font-semibold leading-tight text-orange-primary">
             {date}
@@ -40,5 +35,5 @@ export function EventCard({ id, title, date, day, image }: EventCardProps) {
         Ver detalles
       </Link>
     </div>
-  )
+  );
 }

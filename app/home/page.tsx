@@ -23,7 +23,7 @@ export default function HomePage() {
         <h2 className="mb-3 text-lg font-bold text-foreground">
           Top Eventos Cerca
         </h2>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex gap-3 justify-between overflow-x-auto pb-2 scrollbar-none">
           {EVENTS.map((event) => (
             <EventCard
               key={event.id}
