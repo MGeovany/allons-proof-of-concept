@@ -3,11 +3,10 @@
 import { Resend } from 'resend'
 import QRCode from 'qrcode'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
-/** Genera un buffer PNG del código QR con el contenido dado */
-async function generateQRBuffer(content: string): Promise<Buffer> {
-  return QRCode.toBuffer(content, { type: 'png', margin: 2, width: 400 })
+/** Genera el PNG del QR en Base64 (Resend requiere Base64 para adjuntos según la doc). */
+async function generateQRBase64(content: string): Promise<string> {
+  const buffer = await QRCode.toBuffer(content, { type: 'png', margin: 2, width: 400 })
+  return buffer.toString('base64')
 }
 
 export type SendReservationEmailParams = {
@@ -34,12 +33,23 @@ export async function sendReservationEmailWithQR(
   }
 
   try {
-    const qrBuffer = await generateQRBuffer(reservationId)
+    const qrBase64 = await generateQRBase64(reservationId)
 
-    const from =
+    const fromEmail =
       process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+    const from = fromEmail.includes('<') ? fromEmail : `Allons <${fromEmail}>`
+    if (!process.env.RESEND_FROM_EMAIL) {
+      console.warn(
+        '[email] Usando onboarding@resend.dev. Configura RESEND_FROM_EMAIL (ej. tickets@thefndrs.com) en .env para tu dominio verificado.',
+      )
+    }
 
-    const { error } = await resend.emails.send({
+    console.log('[email] Enviando desde:', from, '→', to)
+
+    // Cliente creado en cada envío para usar la API key actual de env (evita caché en serverless).
+    const resend = new Resend(process.env.RESEND_API_KEY)
+
+    const response = await resend.emails.send({
       from,
       to: [to],
       subject: `Tu código QR - ${eventTitle}`,
@@ -54,17 +64,25 @@ export async function sendReservationEmailWithQR(
       attachments: [
         {
           filename: 'codigo-qr-reserva.png',
-          content: qrBuffer,
+          content: qrBase64,
         },
       ],
     })
+
+    const { data, error } = response
 
     if (error) {
       console.error('[email] Resend rechazó el envío:', error)
       return { ok: false, error: error.message }
     }
 
-    console.log('[email] Correo con QR enviado a', to)
+    // Resend devuelve { data: { id: "..." } } cuando acepta el envío. Si no hay id, algo raro pasó.
+    if (data?.id) {
+      console.log('[email] Resend aceptó el envío. Id:', data.id, '— Búscalo en https://resend.com/emails')
+    } else {
+      console.warn('[email] Resend no devolvió id. Respuesta completa:', JSON.stringify(response))
+    }
+
     return { ok: true }
   } catch (err) {
     console.error('[email] Error generando/enviando correo con QR:', err)
