@@ -1,10 +1,9 @@
-import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronLeft, TicketIcon } from "lucide-react";
+import { TicketIcon } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getEventById } from "@/lib/events";
+import { TicketsListAnimated } from "@/components/home/tickets-list-animated";
 
 export default async function TicketsPage() {
   const supabase = await createClient();
@@ -56,34 +55,7 @@ export default async function TicketsPage() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 pb-28">
-            {mapped.map(({ event, quantity }) => (
-              <Link
-                key={event.id}
-                href={`/home/event/${event.id}/codigo`}
-                className="relative h-32 overflow-hidden rounded-2xl"
-                aria-label={`Ticket de ${event.title}`}
-              >
-                <Image
-                  src={event.ticketImage ?? event.bannerImage ?? event.image}
-                  alt={event.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 430px) 100vw, 430px"
-                  priority
-                />
-                <div className="absolute inset-0 bg-black/35" aria-hidden />
-                <div className="absolute inset-x-0 bottom-0 p-4">
-                  <p className="text-lg font-semibold text-white">
-                    {event.title}
-                  </p>
-                  <p className="mt-1 text-xs text-white/80">
-                    {quantity} {quantity === 1 ? "ticket" : "tickets"}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <TicketsListAnimated items={mapped} />
         )}
       </div>
     </div>

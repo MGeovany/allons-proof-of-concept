@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { motion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
+import { staggerContainer, staggerItem, transitionSmooth } from "@/lib/motion-variants";
 
 const INTEREST_OPTIONS = [
   "Cine y proyecciones",
@@ -125,22 +127,37 @@ export function InterestsSelector({ redirectTo: redirectFromServer, initialInter
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="flex flex-col items-center gap-2 pb-6">
+    <motion.div
+      className="flex flex-1 flex-col"
+      initial="initial"
+      animate="animate"
+      variants={staggerContainer}
+      transition={transitionSmooth}
+    >
+      <motion.div
+        className="flex flex-col items-center gap-2 pb-6"
+        variants={staggerItem}
+      >
         <h1 className="text-2xl font-bold text-foreground">Intereses</h1>
         <p className="text-center text-sm text-muted-foreground">
           Cuéntanos el tipo de eventos que estás buscando
         </p>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-1 flex-wrap justify-center gap-3 pb-6">
+      <motion.div
+        className="flex flex-1 flex-wrap justify-center gap-3 pb-6"
+        variants={staggerContainer}
+      >
         {INTEREST_OPTIONS.map((interest) => {
           const isSelected = selected.includes(interest);
           return (
-            <button
+            <motion.button
               key={interest}
               type="button"
               onClick={() => toggleInterest(interest)}
+              variants={staggerItem}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${
                 isSelected
                   ? "border-orange-primary bg-orange-primary text-white"
@@ -148,24 +165,29 @@ export function InterestsSelector({ redirectTo: redirectFromServer, initialInter
               }`}
             >
               {interest}
-            </button>
+            </motion.button>
           );
         })}
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col items-center gap-3 pb-6">
+      <motion.div
+        className="flex flex-col items-center gap-3 pb-6"
+        variants={staggerItem}
+      >
         <p className="text-balance text-center text-xs text-muted-foreground">
           ¡Selecciona múltiples géneros para una experiencia personalizada!
         </p>
-        <button
+        <motion.button
           type="button"
           onClick={handleSave}
           disabled={loading || selected.length === 0}
           className="w-full max-w-[18rem] rounded-2xl bg-orange-primary py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          whileHover={{ scale: selected.length > 0 ? 1.02 : 1 }}
+          whileTap={{ scale: 0.98 }}
         >
           Guardar
-        </button>
-      </div>
-    </div>
+        </motion.button>
+      </motion.div>
+    </motion.div>
   );
 }

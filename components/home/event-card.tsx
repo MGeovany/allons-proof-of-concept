@@ -1,6 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-
+import { motion } from "motion/react";
 interface EventCardProps {
   id: string;
   title: string;
@@ -11,7 +13,11 @@ interface EventCardProps {
 
 export function EventCard({ id, title, date, day, image }: EventCardProps) {
   return (
-    <div className="flex w-48 shrink-0 flex-col overflow-hidden rounded-xl">
+    <motion.div
+      className="flex w-48 shrink-0 flex-col overflow-hidden rounded-xl"
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      whileTap={{ scale: 0.98 }}
+    >
       <div className="relative h-40">
         <Image src={image} alt={title} fill className="object-cover" />
         <div className="absolute left-2 top-2 flex flex-col items-center rounded-lg bg-background/80 px-2 py-1 backdrop-blur-sm">
@@ -28,12 +34,14 @@ export function EventCard({ id, title, date, day, image }: EventCardProps) {
           </p>
         </div>
       </div>
-      <Link
-        href={`/home/event/${id}`}
-        className="border border-border bg-secondary py-2 text-center text-xs font-medium text-foreground transition-colors hover:bg-accent"
-      >
-        Ver detalles
-      </Link>
-    </div>
+      <motion.div whileHover={{ opacity: 0.9 }} whileTap={{ scale: 0.99 }}>
+        <Link
+          href={`/home/event/${id}`}
+          className="block border border-border bg-secondary py-2 text-center text-xs font-medium text-foreground transition-colors hover:bg-accent"
+        >
+          Ver detalles
+        </Link>
+      </motion.div>
+    </motion.div>
   );
 }

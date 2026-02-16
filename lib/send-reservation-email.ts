@@ -27,8 +27,10 @@ export async function sendReservationEmailWithQR(
   const { to, eventTitle, reservationId, ticketHolderName } = params
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[email] RESEND_API_KEY no configurado, no se envía correo con QR')
-    return { ok: false, error: 'Email no configurado' }
+    console.warn(
+      '[email] RESEND_API_KEY no está en .env — añade RESEND_API_KEY para enviar el QR por correo. Obtén una en https://resend.com',
+    )
+    return { ok: false, error: 'RESEND_API_KEY no configurado' }
   }
 
   try {
@@ -58,10 +60,11 @@ export async function sendReservationEmailWithQR(
     })
 
     if (error) {
-      console.error('[email] Error enviando correo con QR:', error)
+      console.error('[email] Resend rechazó el envío:', error)
       return { ok: false, error: error.message }
     }
 
+    console.log('[email] Correo con QR enviado a', to)
     return { ok: true }
   } catch (err) {
     console.error('[email] Error generando/enviando correo con QR:', err)

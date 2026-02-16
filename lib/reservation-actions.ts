@@ -47,19 +47,24 @@ export async function createReservation(eventId: string, quantity: number) {
 
   if (error) return { error: error.message }
 
-  // Enviar correo con el QR (no bloqueamos la reserva si falla el envío)
+  // Enviar correo con el QR (esperamos para que se envíe antes de responder)
+  let emailSent = false
   const email = user.email
   const event = getEventById(eventId)
   if (email && reservation && event) {
-    sendReservationEmailWithQR({
+    const result = await sendReservationEmailWithQR({
       to: email,
       eventTitle: event.title,
       reservationId: reservation.id,
       ticketHolderName: reservation.ticket_holder_name ?? ticketHolderName ?? 'Invitado',
-    }).catch((e) => console.error('[reservation] Error enviando email con QR:', e))
+    })
+    emailSent = result.ok
+    if (!result.ok) {
+      console.error('[reservation] No se pudo enviar el correo con QR:', result.error)
+    }
   }
 
-  return {}
+  return { emailSent }
 }
 
 export async function getReservationForEvent(

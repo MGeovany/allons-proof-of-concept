@@ -125,13 +125,15 @@ export default function ReservarPage() {
                 }
                 router.push(`/home/event/${event.id}/reservar/cancelado`)
               } else {
-                const { error } = await createReservation(event.id, quantity)
+                const { error, emailSent } = await createReservation(event.id, quantity)
                 if (error) {
                   alert(error)
                   setLoading(false)
                   return
                 }
-                router.push(`/home/event/${event.id}/reservar/success`)
+                router.push(
+                  `/home/event/${event.id}/reservar/success?sent=${emailSent ? '1' : '0'}`,
+                )
               }
             }}
             className={`flex w-full items-center justify-center rounded-2xl py-3.5 text-base font-semibold transition-opacity hover:opacity-90 ${

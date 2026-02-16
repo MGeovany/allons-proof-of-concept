@@ -1,13 +1,14 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getEventById } from "@/lib/events";
 import Image from "next/image";
 
 export default function ReservarSuccessPage() {
   const params = useParams();
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const emailSent = searchParams.get("sent") === "1";
   const event = getEventById(params.id as string);
 
   if (!event) {
@@ -36,9 +37,15 @@ export default function ReservarSuccessPage() {
       <h2 className="text-center text-xl font-bold text-foreground">
         ¡Gracias por tu reservación!
       </h2>
-      <p className="mt-3 text-center text-sm text-muted-foreground">
-        Te enviamos tu código QR a tu correo electrónico.
-      </p>
+      {emailSent ? (
+        <p className="mt-3 text-center text-sm text-muted-foreground">
+          Te enviamos tu código QR a tu correo electrónico. Revisa también la carpeta de spam.
+        </p>
+      ) : (
+        <p className="mt-3 text-center text-sm text-muted-foreground">
+          No pudimos enviar el correo con el QR. Puedes ver tu código aquí abajo.
+        </p>
+      )}
       <p className="mt-1 text-center text-sm text-muted-foreground">
         Mantente al tanto de las novedades de tu evento.
       </p>
