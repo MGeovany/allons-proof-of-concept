@@ -25,17 +25,19 @@ export default async function InterestsPage({ searchParams }: Props) {
 
   const hasInterests =
     Array.isArray(profile?.interests) && profile.interests.length > 0
-
   const params = await searchParams
   const redirectTo = params.redirect ?? undefined
+  const isEditingFromProfile = redirectTo === '/home/profile'
 
-  if (hasInterests) {
+  if (hasInterests && !isEditingFromProfile) {
     redirect(redirectTo ?? '/home')
   }
 
+  const initialInterests = Array.isArray(profile?.interests) ? profile.interests : []
+
   return (
     <main className="flex flex-1 flex-col px-6 py-8">
-      <InterestsSelector redirectTo={redirectTo} />
+      <InterestsSelector redirectTo={redirectTo} initialInterests={initialInterests} />
     </main>
   )
 }

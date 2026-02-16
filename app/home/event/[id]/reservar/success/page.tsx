@@ -37,6 +37,9 @@ export default function ReservarSuccessPage() {
         ¡Gracias por tu reservación!
       </h2>
       <p className="mt-3 text-center text-sm text-muted-foreground">
+        Te enviamos tu código QR a tu correo electrónico.
+      </p>
+      <p className="mt-1 text-center text-sm text-muted-foreground">
         Mantente al tanto de las novedades de tu evento.
       </p>
       <div className="mt-10 flex flex-col gap-3">

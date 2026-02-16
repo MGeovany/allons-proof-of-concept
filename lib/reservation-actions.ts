@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getEventById } from '@/lib/events'
+import { sendReservationEmailWithQR } from '@/lib/send-reservation-email'
 
 export type ReservationRow = {
   id: string
@@ -28,7 +30,7 @@ export async function createReservation(eventId: string, quantity: number) {
   ticketHolderName =
     profile?.name ?? (user.user_metadata?.name as string) ?? 'Invitado'
 
-  const { error } = await supabase
+  const { data: reservation, error } = await supabase
     .schema('event_booking')
     .from('reservations')
     .upsert(
@@ -40,8 +42,23 @@ export async function createReservation(eventId: string, quantity: number) {
       },
       { onConflict: 'user_id,event_id' },
     )
+    .select('id, ticket_holder_name')
+    .single()
 
   if (error) return { error: error.message }
+
+  // Enviar correo con el QR (no bloqueamos la reserva si falla el envío)
+  const email = user.email
+  const event = getEventById(eventId)
+  if (email && reservation && event) {
+    sendReservationEmailWithQR({
+      to: email,
+      eventTitle: event.title,
+      reservationId: reservation.id,
+      ticketHolderName: reservation.ticket_holder_name ?? ticketHolderName ?? 'Invitado',
+    }).catch((e) => console.error('[reservation] Error enviando email con QR:', e))
+  }
+
   return {}
 }
 

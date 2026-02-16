@@ -28,12 +28,13 @@ const INTEREST_OPTIONS = [
 
 type Props = {
   redirectTo?: string;
+  initialInterests?: string[];
 };
 
-export function InterestsSelector({ redirectTo: redirectFromServer }: Props = {}) {
+export function InterestsSelector({ redirectTo: redirectFromServer, initialInterests = [] }: Props = {}) {
   const searchParams = useSearchParams();
   const redirectTo = redirectFromServer ?? searchParams.get("redirect") ?? undefined;
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(initialInterests);
   const [loading, setLoading] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
 
