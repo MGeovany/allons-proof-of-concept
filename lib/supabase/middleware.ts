@@ -41,6 +41,14 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Si Google/Supabase redirige a la raíz con ?code=..., enviar al callback para canjear la sesión
+  if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.get('code')) {
+    const callbackUrl = new URL('/auth/callback', request.nextUrl.origin)
+    request.nextUrl.searchParams.forEach((value, key) => callbackUrl.searchParams.set(key, value))
+    if (!callbackUrl.searchParams.has('next')) callbackUrl.searchParams.set('next', '/home')
+    return NextResponse.redirect(callbackUrl)
+  }
+
   const protectedPaths = ['/home', '/interests', '/provider']
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path),
