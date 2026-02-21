@@ -37,7 +37,7 @@ export default function MessagesPage() {
   const list = tab === "eventos" || tab === "archivados" ? [] : filtered;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col px-4 pb-24 pt-4">
+    <div className="flex min-h-0 flex-1 flex-col px-4 pb-24 pt-8">
       <header className="mb-4">
         <h1 className="text-center text-lg font-bold text-foreground">
           Mensajes

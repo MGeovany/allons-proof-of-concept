@@ -126,8 +126,8 @@ export default function ChatPage() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Mensaje..."
-          className="min-w-0 flex-1 rounded-xl border border-border bg-input px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
+          placeholder="Escribir"
+          className="min-w-0 flex-1 rounded-xl border border-orange-primary/30 bg-white px-4 py-3 text-sm text-black placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
         />
         <button
           type="submit"
