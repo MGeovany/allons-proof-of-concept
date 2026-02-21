@@ -1,6 +1,9 @@
 /** Imagen del banner en detalle (si no se define, se usa DEFAULT_BANNER) */
 export const DEFAULT_BANNER = '/images/event-1.jpg'
 
+/** Correo de Allons para contactar al proveedor en todos los eventos */
+export const PROVIDER_CONTACT_EMAIL = 'allonsapp@outlook.com'
+
 export interface ProviderContacts {
   instagram?: string
   whatsapp?: string
@@ -42,6 +45,7 @@ export const EVENTS: EventDetail[] = [
     bannerImage: '/images/jete-event.png',
     ticketImage: '/images/jete-event.png',
     organizer: 'Jeté dance & fitness studio',
+    providerContacts: { email: PROVIDER_CONTACT_EMAIL },
     tags: ['Wellness', 'Pilates', 'Fitness', 'Aire Libre'],
     description:
       'Disfruta de una clase de Pilates On Mat enfocada en fortalecer tu cuerpo, mejorar tu flexibilidad y conectar con tu respiración. Una experiencia ideal para moverte, relajarte y recargar energías.',
@@ -65,6 +69,7 @@ export const EVENTS: EventDetail[] = [
     bannerImage: '/images/bio-event.png',
     ticketImage: '/images/bio-event.png',
     organizer: 'Smart Rabbit HN',
+    providerContacts: { email: PROVIDER_CONTACT_EMAIL },
     tags: ['VR', 'Naturaleza', 'Tecnología'],
     description:
       'Explora la biodiversidad del mundo a través de una experiencia de Realidad Virtual inmersiva. Recorre distintos ecosistemas y conoce fascinantes especies animales en su hábitat natural mientras aprendes de forma interactiva.',
@@ -88,6 +93,7 @@ export const EVENTS: EventDetail[] = [
     bannerImage: '/images/capital-event.png',
     ticketImage: '/images/capital-event.png',
     organizer: 'New Life Run Club',
+    providerContacts: { email: PROVIDER_CONTACT_EMAIL },
     tags: ['Deportes', 'Comunidad', 'Running', '+13'],
     description:
       'Segunda edición de la carrera insignia de New Life Run Club. Parte de las ganancias irán destinadas al hogar de ancianos Salvador Aguirre.',
@@ -111,6 +117,7 @@ export const EVENTS: EventDetail[] = [
     bannerImage: '/images/der-event.png',
     ticketImage: '/images/der-event.png',
     organizer: 'Gods Gym',
+    providerContacts: { email: PROVIDER_CONTACT_EMAIL },
     tags: ['Deportes', 'Comunidad', 'Fisicoculturismo natural', 'Torneo', '+17'],
     description:
       'Segunda edición del torneo de fisicoculturismo natural más grande de Honduras. Un evento para incentivar a toda la comunidad en la búsqueda de una mejor salud. Una convergencia entre arte, deporte y cultura.',
