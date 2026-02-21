@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { CalendarImage } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import { DEFAULT_BANNER } from "@/lib/events";
 
 interface EventCardProps {
@@ -34,7 +34,7 @@ export function EventCard({ id, title, date, day, image }: EventCardProps) {
               className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted/80"
               aria-hidden
             >
-              <CalendarImage className="h-12 w-12 shrink-0 text-muted-foreground/60" />
+              <ImageIcon className="h-12 w-12 shrink-0 text-muted-foreground/60" />
               <span className="text-xs font-medium text-muted-foreground">
                 Sin imagen
               </span>

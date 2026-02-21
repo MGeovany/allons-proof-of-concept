@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Search, ChevronLeft } from "lucide-react";
@@ -27,19 +26,19 @@ const DEFAULT_HISTORY = [
 export default function SearchPage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [history] = useState<string[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_HISTORY;
+  const [history, setHistory] = useState<string[]>(DEFAULT_HISTORY);
+
+  useEffect(() => {
     try {
       const stored = localStorage.getItem("allons-search-history");
       if (stored) {
         const parsed = JSON.parse(stored) as string[];
-        return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_HISTORY;
+        if (Array.isArray(parsed) && parsed.length > 0) setHistory(parsed);
       }
     } catch {
       // ignore
     }
-    return DEFAULT_HISTORY;
-  });
+  }, []);
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
