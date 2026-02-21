@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { CalendarImage } from "lucide-react";
+import { DEFAULT_BANNER } from "@/lib/events";
 
 interface EventCardProps {
   id: string;
@@ -13,6 +16,11 @@ interface EventCardProps {
 }
 
 export function EventCard({ id, title, date, day, image }: EventCardProps) {
+  const usePlaceholder =
+    image === DEFAULT_BANNER || !image;
+  const [imgError, setImgError] = useState(false);
+  const showPlaceholder = usePlaceholder || imgError;
+
   return (
     <Link href={`/home/event/${id}`} className="block w-full">
       <motion.div
@@ -21,13 +29,26 @@ export function EventCard({ id, title, date, day, image }: EventCardProps) {
         whileTap={{ scale: 0.98 }}
       >
         <div className="relative h-40">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
+          {showPlaceholder ? (
+            <div
+              className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted/80"
+              aria-hidden
+            >
+              <CalendarImage className="h-12 w-12 shrink-0 text-muted-foreground/60" />
+              <span className="text-xs font-medium text-muted-foreground">
+                Sin imagen
+              </span>
+            </div>
+          ) : (
+            <Image
+              src={image}
+              alt={title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              onError={() => setImgError(true)}
+            />
+          )}
           <div className="absolute left-2 top-2 flex flex-col items-center rounded-lg bg-background/80 px-2 py-1 backdrop-blur-sm">
             <span className="text-[10px] font-semibold leading-tight text-orange-primary">
               {date}

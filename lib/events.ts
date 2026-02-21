@@ -84,7 +84,9 @@ export const EVENTS: EventDetail[] = [
     title: 'Capital Run Fest II',
     date: 'Abr',
     day: '19',
-    image: DEFAULT_BANNER,
+    image: '/images/capital-event.png',
+    bannerImage: '/images/capital-event.png',
+    ticketImage: '/images/capital-event.png',
     organizer: 'New Life Run Club',
     tags: ['Deportes', 'Comunidad', 'Running', '+13'],
     description:
@@ -105,7 +107,9 @@ export const EVENTS: EventDetail[] = [
     title: 'Der Blitz',
     date: 'Mar',
     day: '27',
-    image: DEFAULT_BANNER,
+    image: '/images/der-event.png',
+    bannerImage: '/images/der-event.png',
+    ticketImage: '/images/der-event.png',
     organizer: 'Gods Gym',
     tags: ['Deportes', 'Comunidad', 'Fisicoculturismo natural', 'Torneo', '+17'],
     description:

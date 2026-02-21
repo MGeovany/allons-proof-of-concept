@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { SearchBar } from "@/components/home/search-bar";
@@ -10,7 +12,26 @@ import { staggerContainer, staggerItem, transitionSmooth } from "@/lib/motion-va
 
 type Props = { events: EventDetail[] };
 
+function filterEventsByQuery(events: EventDetail[], q: string): EventDetail[] {
+  const term = q.trim().toLowerCase();
+  if (!term) return events;
+  return events.filter(
+    (e) =>
+      e.title.toLowerCase().includes(term) ||
+      e.organizer.toLowerCase().includes(term) ||
+      e.description.toLowerCase().includes(term) ||
+      e.tags.some((t) => t.toLowerCase().includes(term)),
+  );
+}
+
 export function HomeContentAnimated({ events }: Props) {
+  const searchParams = useSearchParams();
+  const q = searchParams.get("q") ?? "";
+  const filteredEvents = useMemo(
+    () => filterEventsByQuery(events, q),
+    [events, q],
+  );
+
   return (
     <motion.div
       className="flex flex-col gap-5 px-4 pb-4 pt-6"
@@ -38,7 +59,7 @@ export function HomeContentAnimated({ events }: Props) {
 
       <motion.section variants={staggerItem}>
         <h2 className="mb-3 text-lg font-bold text-foreground">
-          Top Eventos Cerca
+          {q ? `Resultados${filteredEvents.length ? "" : " (ninguno)"}` : "Top Eventos Cerca"}
         </h2>
         <motion.div
           className="grid grid-cols-2 gap-3 pb-2 sm:grid-cols-3"
@@ -47,7 +68,7 @@ export function HomeContentAnimated({ events }: Props) {
           animate="animate"
           transition={{ ...transitionSmooth, delayChildren: 0.1 }}
         >
-          {events.map((event, i) => (
+          {filteredEvents.map((event) => (
             <motion.div key={event.id} variants={staggerItem}>
               <EventCard
                 id={event.id}
