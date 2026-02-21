@@ -29,7 +29,8 @@ export default function EventDetailPage() {
   const [tab, setTab] = useState<Tab>("evento");
   const [isReserved, setIsReserved] = useState(false);
   const event = getEventById(params.id as string);
-  const isJungla = event?.id === "1";
+  // Por ahora solo el evento 2 tiene galeria cargada (assets locales)
+  const hasGallery = event?.id === "2";
 
   useEffect(() => {
     if (!event?.id) return;
@@ -259,7 +260,7 @@ export default function EventDetailPage() {
               ))}
             </div>
             {/* Grid galería 3 columnas */}
-            {isJungla ? (
+            {!hasGallery ? (
               <div className="pb-24">
                 <div className="grid grid-cols-3 gap-1.5">
                   {Array.from({ length: 9 }).map((_, i) => (

@@ -41,7 +41,7 @@ export function HomeContentAnimated({ events }: Props) {
           Top Eventos Cerca
         </h2>
         <motion.div
-          className="flex gap-3 justify-between overflow-x-auto pb-2 scrollbar-none"
+          className="grid grid-cols-2 gap-3 pb-2 sm:grid-cols-3"
           variants={staggerContainer}
           initial="initial"
           animate="animate"
