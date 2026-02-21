@@ -143,6 +143,9 @@ export default function ReservarPage() {
           >
             {isCancel ? 'Cancelar reserva' : 'Reservar, Pago en el local'}
           </button>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            ¿Vas con amigos? <Link href="/home/messages" className="text-orange-primary hover:underline">Coordina en Mensajes</Link>; próximamente podrás comprar entradas en grupo.
+          </p>
         </div>
       </div>
     </div>
