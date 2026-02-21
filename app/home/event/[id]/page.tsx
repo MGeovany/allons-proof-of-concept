@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronLeft, Share2, CalendarDays, QrCode } from "lucide-react";
+import { ChevronLeft, Share2, CalendarDays, QrCode, MapPin } from "lucide-react";
 import { getEventById, DEFAULT_BANNER } from "@/lib/events";
 import { hasReservationForEvent } from "@/lib/reservation-actions";
 import { staggerContainer, staggerItem, transitionSmooth } from "@/lib/motion-variants";
@@ -211,7 +211,7 @@ export default function EventDetailPage() {
               Descripción de evento
             </h3>
 
-            <div className="px-4">
+            <div className="mb-6 px-4">
               {/* Hora y Lugar - ícono + etiqueta, luego lugar y hora */}
               <div className="mb-2 flex items-center gap-2">
                 <CalendarDays className="h-5 w-5 shrink-0 text-foreground" />
@@ -220,9 +220,18 @@ export default function EventDetailPage() {
                 </span>
               </div>
               <p className="mb-1 text-sm text-foreground">{event.venue}</p>
-              <p className="mb-6 text-sm font-medium text-foreground">
+              <p className="mb-3 text-sm font-medium text-foreground">
                 {event.time}
               </p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                <MapPin className="h-4 w-4 shrink-0 text-orange-primary" />
+                Ver en mapas
+              </a>
             </div>
 
             {/* Descripción texto (opcional, si hay) */}

@@ -79,6 +79,48 @@ export const EVENTS: EventDetail[] = [
       { author: 'Carlos', initial: 'C', text: 'Buen contenido y buena organización en el evento.' },
     ],
   },
+  {
+    id: '5',
+    title: 'Capital Run Fest II',
+    date: 'Abr',
+    day: '19',
+    image: DEFAULT_BANNER,
+    organizer: 'New Life Run Club',
+    tags: ['Deportes', 'Comunidad', 'Running', '+13'],
+    description:
+      'Segunda edición de la carrera insignia de New Life Run Club. Parte de las ganancias irán destinadas al hogar de ancianos Salvador Aguirre.',
+    venue: 'Hotel Clarion, Tegucigalpa, Honduras',
+    time: '4:00 pm',
+    price: 600,
+    displayDateTime: 'Domingo, 19 de Abril, 4:00 pm',
+    reserveUntil: '18 de Abril, 2026',
+    reviews: [
+      { author: 'María', initial: 'M', text: 'Una carrera con causa. Muy bien organizada.' },
+      { author: 'Pedro', initial: 'P', text: 'Ambiente familiar y gran experiencia.' },
+      { author: 'Laura', initial: 'L', text: 'Repetiré el próximo año sin dudarlo.' },
+    ],
+  },
+  {
+    id: '6',
+    title: 'Der Blitz',
+    date: 'Mar',
+    day: '27',
+    image: DEFAULT_BANNER,
+    organizer: 'Gods Gym',
+    tags: ['Deportes', 'Comunidad', 'Fisicoculturismo natural', 'Torneo', '+17'],
+    description:
+      'Segunda edición del torneo de fisicoculturismo natural más grande de Honduras. Un evento para incentivar a toda la comunidad en la búsqueda de una mejor salud. Una convergencia entre arte, deporte y cultura.',
+    venue: 'Hotel Honduras Maya, Tegucigalpa, Honduras',
+    time: 'Por confirmar',
+    price: 600,
+    displayDateTime: 'Viernes 27 y Sábado 28 de Marzo, 2026',
+    reserveUntil: '26 de Marzo, 2026',
+    reviews: [
+      { author: 'Carlos', initial: 'C', text: 'El torneo natural más grande del país. Nivel altísimo.' },
+      { author: 'Andrea', initial: 'A', text: 'Gran ambiente y organización de Gods Gym.' },
+      { author: 'Roberto', initial: 'R', text: 'Motivador ver tanto talento en un solo lugar.' },
+    ],
+  },
 ]
 
 export function getEventById(id: string): EventDetail | undefined {
