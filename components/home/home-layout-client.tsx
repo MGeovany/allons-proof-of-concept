@@ -10,13 +10,14 @@ export function HomeLayoutClient({
 }) {
   const pathname = usePathname()
   const isEventDetail = pathname.startsWith('/home/event/')
+  const isChatConversation = pathname.match(/^\/home\/messages\/[^/]+$/)
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {children}
       </div>
-      {!isEventDetail && <BottomNav />}
+      {!isEventDetail && !isChatConversation && <BottomNav />}
     </div>
   )
 }

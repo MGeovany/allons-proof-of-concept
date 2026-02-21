@@ -38,6 +38,11 @@ create policy "event_booking_profiles_update_own"
   on event_booking.profiles for update
   using (auth.uid() = id);
 
+-- Permitir a usuarios autenticados leer perfiles de otros (para amigos y mensajes)
+create policy "event_booking_profiles_select_authenticated"
+  on event_booking.profiles for select
+  using (auth.role() = 'authenticated');
+
 -- Trigger: al registrar un usuario (auth.users), crear fila en event_booking.profiles
 -- No toca el trigger ni la tabla public.profiles de la otra app
 create or replace function event_booking.handle_new_user()
@@ -121,6 +126,54 @@ alter table event_booking.profiles add column if not exists interests text[] def
 alter table event_booking.profiles add column if not exists role text default 'user';
 alter table event_booking.profiles add column if not exists avatar_url text;
 alter table event_booking.profiles add column if not exists location text;
+
+-- Amigos: relación bidireccional (user_id añadió a friend_id; ambos se ven como amigos)
+create table if not exists event_booking.friends (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  friend_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique(user_id, friend_id),
+  check (user_id != friend_id)
+);
+alter table event_booking.friends enable row level security;
+drop policy if exists "event_booking_friends_select" on event_booking.friends;
+drop policy if exists "event_booking_friends_insert" on event_booking.friends;
+drop policy if exists "event_booking_friends_delete" on event_booking.friends;
+create policy "event_booking_friends_select" on event_booking.friends for select using (auth.uid() = user_id or auth.uid() = friend_id);
+create policy "event_booking_friends_insert" on event_booking.friends for insert with check (auth.uid() = user_id);
+create policy "event_booking_friends_delete" on event_booking.friends for delete using (auth.uid() = user_id or auth.uid() = friend_id);
+
+-- Chats: conversación entre dos usuarios (user1_id < user2_id para unicidad)
+create table if not exists event_booking.chats (
+  id uuid primary key default gen_random_uuid(),
+  user1_id uuid not null references auth.users(id) on delete cascade,
+  user2_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique(user1_id, user2_id),
+  check (user1_id < user2_id)
+);
+alter table event_booking.chats enable row level security;
+drop policy if exists "event_booking_chats_select" on event_booking.chats;
+drop policy if exists "event_booking_chats_insert" on event_booking.chats;
+create policy "event_booking_chats_select" on event_booking.chats for select using (auth.uid() = user1_id or auth.uid() = user2_id);
+create policy "event_booking_chats_insert" on event_booking.chats for insert with check (auth.uid() = user1_id or auth.uid() = user2_id);
+
+-- Mensajes de chat
+create table if not exists event_booking.chat_messages (
+  id uuid primary key default gen_random_uuid(),
+  chat_id uuid not null references event_booking.chats(id) on delete cascade,
+  sender_id uuid not null references auth.users(id) on delete cascade,
+  content text not null,
+  created_at timestamptz default now()
+);
+alter table event_booking.chat_messages enable row level security;
+drop policy if exists "event_booking_chat_messages_select" on event_booking.chat_messages;
+drop policy if exists "event_booking_chat_messages_insert" on event_booking.chat_messages;
+create policy "event_booking_chat_messages_select" on event_booking.chat_messages for select
+  using (exists (select 1 from event_booking.chats c where c.id = chat_id and (c.user1_id = auth.uid() or c.user2_id = auth.uid())));
+create policy "event_booking_chat_messages_insert" on event_booking.chat_messages for insert
+  with check (sender_id = auth.uid() and exists (select 1 from event_booking.chats c where c.id = chat_id and (c.user1_id = auth.uid() or c.user2_id = auth.uid())));
 
 -- Asignar rol proveedor a los correos autorizados
 update event_booking.profiles

@@ -3,12 +3,12 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { Home, TicketIcon, Bell, User } from 'lucide-react'
+import { Home, TicketIcon, MessageCircle, User } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/home', icon: Home, label: 'Inicio' },
   { href: '/home/tickets', icon: TicketIcon, label: 'Tickets' },
-  { href: '/home/notifications', icon: Bell, label: 'Alertas' },
+  { href: '/home/messages', icon: MessageCircle, label: 'Mensajes' },
   { href: '/home/profile', icon: User, label: 'Perfil' },
 ]
 
