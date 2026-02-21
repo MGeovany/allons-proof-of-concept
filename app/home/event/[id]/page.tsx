@@ -37,6 +37,36 @@ export default function EventDetailPage() {
     hasReservationForEvent(event.id).then(setIsReserved);
   }, [event?.id]);
 
+  function handleShare() {
+    const url =
+      typeof window !== "undefined"
+        ? window.location.href
+        : `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/home/event/${event?.id}`;
+    const title = event?.title ?? "Evento";
+    const text = event?.description
+      ? `${event.title}\n\n${event.description.slice(0, 120)}…`
+      : event?.title ?? "";
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator
+        .share({
+          title,
+          text: text || title,
+          url,
+        })
+        .catch((err) => {
+          if (err?.name !== "AbortError") {
+            console.error("[share]", err);
+          }
+        });
+    } else {
+      navigator.clipboard?.writeText(url).then(
+        () => {},
+        () => {}
+      );
+    }
+  }
+
   if (!event) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
@@ -99,6 +129,7 @@ export default function EventDetailPage() {
             )}
             <motion.button
               type="button"
+              onClick={handleShare}
               className="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm"
               aria-label="Compartir"
               whileTap={{ scale: 0.9 }}

@@ -68,9 +68,9 @@ export function ProfileView({
             {email ? (
               <p className="mt-0.5 text-sm text-muted-foreground">{email}</p>
             ) : null}
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {location}
-            </p>
+            {location ? (
+              <p className="mt-0.5 text-sm text-muted-foreground">{location}</p>
+            ) : null}
             {interests.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {interests.slice(0, 5).map((tag) => (

@@ -3,10 +3,22 @@
 import { Resend } from 'resend'
 import QRCode from 'qrcode'
 
-/** Genera el PNG del QR en Base64 (Resend requiere Base64 para adjuntos según la doc). */
+/** Mismo naranja que la app (tailwind orange-primary). */
+const ORANGE_PRIMARY = '#F67010'
+
+/**
+ * Genera el PNG del QR con el mismo estilo que en la app: módulos blancos sobre fondo naranja.
+ * Devuelve Base64 para adjuntos e inline (Resend usa Base64).
+ */
 async function generateQRBase64(content: string): Promise<string> {
-  const buffer = await QRCode.toBuffer(content, { type: 'png', margin: 2, width: 400 })
-  return buffer.toString('base64')
+  const dataUrl = await QRCode.toDataURL(content, {
+    type: 'png',
+    margin: 2,
+    width: 400,
+    color: { dark: '#FFFFFF', light: ORANGE_PRIMARY },
+  })
+  const base64 = dataUrl.replace(/^data:image\/png;base64,/, '')
+  return base64
 }
 
 export type SendReservationEmailParams = {
@@ -54,17 +66,23 @@ export async function sendReservationEmailWithQR(
       to: [to],
       subject: `Tu código QR - ${eventTitle}`,
       html: `
-        <h2>¡Reserva confirmada!</h2>
-        <p>Hola <strong>${escapeHtml(ticketHolderName)}</strong>,</p>
-        <p>Tu reserva para <strong>${escapeHtml(eventTitle)}</strong> está confirmada.</p>
-        <p>Adjunto encontrarás tu código QR. Muestra este código al encargado en el evento para ingresar.</p>
-        <p>También puedes ver tu código en la app en cualquier momento.</p>
-        <p>— El equipo</p>
+        <div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2 style="color: #111; margin-bottom: 8px;">¡Reserva confirmada!</h2>
+          <p style="color: #333;">Hola <strong>${escapeHtml(ticketHolderName)}</strong>,</p>
+          <p style="color: #333;">Tu reserva para <strong>${escapeHtml(eventTitle)}</strong> está confirmada.</p>
+          <p style="color: #333; margin-bottom: 24px;">Muestra este código QR al encargado en el evento para ingresar. También puedes verlo en la app en cualquier momento.</p>
+          <div style="width: 280px; height: 280px; margin: 0 auto 24px; border-radius: 50%; overflow: hidden; background: ${ORANGE_PRIMARY};">
+            <img src="cid:codigo-qr-reserva" alt="Código QR de acceso" width="280" height="280" style="display: block; width: 100%; height: 100%; object-fit: contain;" />
+          </div>
+          <p style="color: #666; font-size: 14px;">— El equipo Allons</p>
+        </div>
       `,
       attachments: [
         {
           filename: 'codigo-qr-reserva.png',
           content: qrBase64,
+          contentType: 'image/png',
+          inlineContentId: 'codigo-qr-reserva',
         },
       ],
     })

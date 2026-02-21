@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { SlidersHorizontal } from 'lucide-react'
 
 const CATEGORIES = [
@@ -33,13 +34,13 @@ export function CategoryChips() {
           </button>
         ))}
       </div>
-      <button
-        type="button"
+      <Link
+        href="/interests?redirect=/home&from=filters"
         className="shrink-0 rounded-lg p-1.5 text-foreground transition-colors hover:bg-secondary"
-        aria-label="Filtros"
+        aria-label="Ajustar filtros - ver todos los tipos de eventos"
       >
         <SlidersHorizontal className="h-5 w-5" />
-      </button>
+      </Link>
     </div>
   )
 }

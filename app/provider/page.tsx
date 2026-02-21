@@ -7,7 +7,7 @@ import { getGuestsForEvent, isProvider, type GuestRow } from "@/lib/provider-act
 import { getEventById } from "@/lib/events";
 import { LogOut, Users, Ticket } from "lucide-react";
 
-const PROVIDER_EVENT_IDS = ["1", "2"]; // Jungla, Rawayana
+const PROVIDER_EVENT_IDS: string[] = [];
 
 export default function ProviderPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);

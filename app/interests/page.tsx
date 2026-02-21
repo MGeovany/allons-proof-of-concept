@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { InterestsSelector } from '@/components/interests/interests-selector'
 
 type Props = {
-  searchParams: Promise<{ redirect?: string }>
+  searchParams: Promise<{ redirect?: string; from?: string }>
 }
 
 export default async function InterestsPage({ searchParams }: Props) {
@@ -28,8 +28,9 @@ export default async function InterestsPage({ searchParams }: Props) {
   const params = await searchParams
   const redirectTo = params.redirect ?? undefined
   const isEditingFromProfile = redirectTo === '/home/profile'
+  const isFromFilters = params.from === 'filters'
 
-  if (hasInterests && !isEditingFromProfile) {
+  if (hasInterests && !isEditingFromProfile && !isFromFilters) {
     redirect(redirectTo ?? '/home')
   }
 

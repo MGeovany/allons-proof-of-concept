@@ -119,6 +119,8 @@ alter role authenticator set pgrst.db_schemas = 'public, event_booking';
 -- Asegurar columnas opcionales si la tabla se creó antes
 alter table event_booking.profiles add column if not exists interests text[] default '{}';
 alter table event_booking.profiles add column if not exists role text default 'user';
+alter table event_booking.profiles add column if not exists avatar_url text;
+alter table event_booking.profiles add column if not exists location text;
 
 -- Asignar rol proveedor a los correos autorizados
 update event_booking.profiles

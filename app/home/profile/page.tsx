@@ -13,16 +13,18 @@ export default async function ProfilePage() {
   const { data: profile } = await supabase
     .schema('event_booking')
     .from('profiles')
-    .select('name, interests')
+    .select('name, interests, location, avatar_url')
     .eq('id', user.id)
     .single()
 
   const displayName =
     profile?.name ?? (user.user_metadata?.name as string) ?? 'Invitado'
   const interests = profile?.interests ?? []
-  const location = 'San Pedro Sula'
+  const location =
+    (profile?.location as string | null) ?? (user.user_metadata?.location as string | null) ?? ''
   const email = user.email ?? ''
   const avatarUrl =
+    (profile?.avatar_url as string | null) ??
     (user.user_metadata?.avatar_url as string) ??
     (user.user_metadata?.picture as string) ??
     null
