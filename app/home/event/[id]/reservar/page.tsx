@@ -98,6 +98,11 @@ export default function ReservarPage() {
         <p className="text-sm text-muted-foreground">
           Reservas disponibles hasta el {event.reserveUntil}
         </p>
+        {event.capacity != null && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            Límite: {event.capacity} personas
+          </p>
+        )}
         </div>
 
         {/* Resumen y botón */}

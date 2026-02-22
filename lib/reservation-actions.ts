@@ -1,8 +1,25 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/admin'
 import { getEventById } from '@/lib/events'
 import { sendReservationEmailWithQR } from '@/lib/send-reservation-email'
+
+/** Total de plazas reservadas para un evento (requiere service role para ver todas las reservas). */
+async function getTotalReservedForEvent(eventId: string): Promise<number> {
+  try {
+    const admin = createServiceRoleClient()
+    const { data: rows } = await admin
+      .schema('event_booking')
+      .from('reservations')
+      .select('quantity')
+      .eq('event_id', eventId)
+    const total = (rows ?? []).reduce((sum, r) => sum + (r.quantity ?? 0), 0)
+    return total
+  } catch {
+    return 0
+  }
+}
 
 export type ReservationRow = {
   id: string
@@ -19,6 +36,19 @@ export async function createReservation(eventId: string, quantity: number) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Debes iniciar sesión para reservar' }
+
+  const event = getEventById(eventId)
+  if (event?.capacity != null) {
+    const totalReserved = await getTotalReservedForEvent(eventId)
+    const currentUserReservation = await getReservationForEvent(eventId)
+    const currentUserQty = currentUserReservation?.quantity ?? 0
+    const spotsAfter = totalReserved - currentUserQty + quantity
+    if (spotsAfter > event.capacity) {
+      return {
+        error: `No hay cupos disponibles. Este evento tiene un límite de ${event.capacity} personas.`,
+      }
+    }
+  }
 
   let ticketHolderName: string | null = null
   const { data: profile } = await supabase

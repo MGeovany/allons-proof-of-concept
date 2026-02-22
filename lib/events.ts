@@ -33,6 +33,8 @@ export interface EventDetail {
   displayDateTime: string
   /** Reservas disponibles hasta (ej. "13 de Junio, 2025") */
   reserveUntil: string
+  /** Límite de personas (cupos). Si no se define, sin límite. */
+  capacity?: number
   reviews: { author: string; initial: string; text: string }[]
 }
 
@@ -55,6 +57,7 @@ export const EVENTS: EventDetail[] = [
     price: 0,
     displayDateTime: 'Martes, 24 de Febrero, 3:30 pm',
     reserveUntil: '24 de Febrero, 2026',
+    capacity: 10,
     reviews: [
       { author: 'Ana', initial: 'A', text: 'Clase súper completa, sales renovado.' },
       { author: 'David', initial: 'D', text: 'Buen ritmo y excelente guía durante toda la sesión.' },
