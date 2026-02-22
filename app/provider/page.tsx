@@ -3,16 +3,31 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "@/lib/auth-actions";
-import { getGuestsForEvent, isProvider, type GuestRow } from "@/lib/provider-actions";
+import { getGuestsForEvent, isProvider, deleteReservationAsProvider, type GuestRow } from "@/lib/provider-actions";
 import { getEventById } from "@/lib/events";
-import { LogOut, Users, Ticket } from "lucide-react";
+import { LogOut, Users, Ticket, Trash2 } from "lucide-react";
 
-const PROVIDER_EVENT_IDS: string[] = [];
+const PROVIDER_EVENT_IDS = ["3", "4", "5", "6"]; // Jeté Pilates, VR, Capital Run Fest II, Der Blitz
 
 export default function ProviderPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [guestsByEvent, setGuestsByEvent] = useState<Record<string, GuestRow[]>>({});
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleDeleteReservation(reservationId: string, eventId: string) {
+    if (deletingId) return;
+    if (!confirm("¿Eliminar esta reserva? El usuario ya no tendrá acceso al evento.")) return;
+    setDeletingId(reservationId);
+    const { error } = await deleteReservationAsProvider(reservationId);
+    setDeletingId(null);
+    if (error) {
+      alert(error);
+      return;
+    }
+    const { data } = await getGuestsForEvent(eventId);
+    setGuestsByEvent((prev) => ({ ...prev, [eventId]: data ?? [] }));
+  }
 
   useEffect(() => {
     isProvider().then((ok) => {
@@ -113,14 +128,23 @@ export default function ProviderPage() {
                     guests.map((g) => (
                       <li
                         key={g.id}
-                        className="flex items-center justify-between px-4 py-2 text-sm"
+                        className="flex items-center justify-between gap-2 px-4 py-2 text-sm"
                       >
-                        <span className="text-foreground">
+                        <span className="min-w-0 flex-1 text-foreground">
                           {g.ticket_holder_name ?? "Invitado"}
                         </span>
-                        <span className="rounded-md bg-orange-primary/15 px-2 py-0.5 text-xs font-medium text-orange-primary">
+                        <span className="shrink-0 rounded-md bg-orange-primary/15 px-2 py-0.5 text-xs font-medium text-orange-primary">
                           {g.quantity} {g.quantity === 1 ? "entrada" : "entradas"}
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteReservation(g.id, eventId)}
+                          disabled={deletingId === g.id}
+                          className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive disabled:opacity-50"
+                          aria-label="Eliminar reserva"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </li>
                     ))
                   )}

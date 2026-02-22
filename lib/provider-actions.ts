@@ -68,3 +68,14 @@ export async function isProvider(): Promise<boolean> {
   } = await supabase.auth.getUser()
   return !!user && isProviderEmail(user.email ?? undefined)
 }
+
+/** Elimina una reserva. Solo el proveedor autorizado puede llamar. */
+export async function deleteReservationAsProvider(reservationId: string): Promise<{ error: string | null }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || !isProviderEmail(user.email ?? undefined)) return { error: 'No autorizado' }
+  const admin = createServiceRoleClient()
+  const { error } = await admin.schema('event_booking').from('reservations').delete().eq('id', reservationId)
+  if (error) return { error: error.message }
+  return { error: null }
+}
