@@ -80,7 +80,6 @@ export async function createReservation(eventId: string, quantity: number) {
   // Enviar correo con el QR (esperamos para que se envíe antes de responder)
   let emailSent = false
   const email = user.email
-  const event = getEventById(eventId)
   if (email && reservation && event) {
     const result = await sendReservationEmailWithQR({
       to: email,
