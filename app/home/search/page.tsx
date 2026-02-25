@@ -88,10 +88,10 @@ export default function SearchPage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Búsqueda"
             autoFocus
-            className="w-full rounded-xl border border-border bg-input px-4 py-3.5 pr-12 text-sm text-input-foreground placeholder:text-muted-foreground focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3.5 pr-12 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
             aria-label="Buscar eventos"
           />
-          <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
         </div>
       </form>
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Users } from "lucide-react";
 import { getChats, type ChatPreview } from "@/lib/messages-actions";
 
 const TABS = [
@@ -38,10 +38,17 @@ export default function MessagesPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-4 pb-24 pt-8">
-      <header className="mb-4">
-        <h1 className="text-center text-lg font-bold text-foreground">
+      <header className="mb-4 flex items-center justify-between gap-3">
+        <h1 className="text-lg font-bold text-foreground">
           Mensajes
         </h1>
+        <Link
+          href="/home/friends"
+          className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+        >
+          <Users className="h-4 w-4" />
+          Ver amigos
+        </Link>
       </header>
 
       <div className="relative mb-4">
@@ -50,9 +57,9 @@ export default function MessagesPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Búsqueda"
-          className="w-full rounded-xl border border-border bg-input px-4 py-3 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
+          className="w-full rounded-xl border border-border bg-input px-4 py-3 pr-10 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
         />
-        <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
       </div>
 
       <div className="mb-4 flex gap-2 overflow-x-auto scrollbar-none">
@@ -85,14 +92,6 @@ export default function MessagesPage() {
                 ? "No hay conversaciones archivadas."
                 : "No tienes conversaciones aún. Agrega amigos y empieza a chatear."}
           </p>
-          {tab === "todos" && (
-            <Link
-              href="/home/friends"
-              className="text-sm font-medium text-orange-primary hover:underline"
-            >
-              Ver amigos
-            </Link>
-          )}
         </div>
       ) : (
         <ul className="flex flex-col gap-1">

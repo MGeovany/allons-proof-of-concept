@@ -61,9 +61,9 @@ export default function FriendsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Búsqueda"
-          className="w-full rounded-xl border border-border bg-input px-4 py-3 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
+          className="w-full rounded-xl border border-border bg-input px-4 py-3 pr-10 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
         />
-        <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
       </div>
 
       <div className="mb-4 flex gap-2">
@@ -85,7 +85,7 @@ export default function FriendsPage() {
         <p className="py-8 text-center text-sm text-muted-foreground">Cargando…</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 py-8 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-foreground">
             {search.trim() ? "No hay coincidencias." : "Aún no tienes amigos agregados."}
           </p>
           {!search.trim() && (

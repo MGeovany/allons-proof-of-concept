@@ -93,11 +93,11 @@ export function HomeContentAnimated({ events }: Props) {
       <motion.div variants={staggerItem}>
         <Link
           href="/home/search"
-          className="relative flex w-full items-center rounded-lg bg-input px-4 py-3 pr-10 text-left text-sm text-input-foreground"
+          className="relative flex w-full items-center rounded-lg bg-input px-4 py-3 pr-10 text-left text-sm text-neutral-500"
           aria-label="Abrir búsqueda"
         >
-          <span className="text-muted-foreground">Búsqueda</span>
-          <svg className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+          <span className="text-neutral-500">Búsqueda</span>
+          <svg className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </Link>

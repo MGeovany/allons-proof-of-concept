@@ -113,7 +113,7 @@ export function RegisterForm() {
             required
             value={values.name}
             onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
-            className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
+            className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
           />
           <input
             name="username"
@@ -124,7 +124,7 @@ export function RegisterForm() {
             onChange={(e) =>
               setValues((v) => ({ ...v, username: e.target.value }))
             }
-            className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
+            className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
           />
           <input
             name="email"
@@ -133,7 +133,7 @@ export function RegisterForm() {
             required
             value={values.email}
             onChange={(e) => setValues((v) => ({ ...v, email: e.target.value }))}
-            className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
+            className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
           />
           <div className="relative">
             <input
@@ -146,7 +146,7 @@ export function RegisterForm() {
               onChange={(e) =>
                 setValues((v) => ({ ...v, password: e.target.value }))
               }
-              className="w-full rounded-lg bg-input pr-12 pl-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
+              className="w-full rounded-lg bg-input pr-12 pl-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
             />
             <button
               type="button"
@@ -174,7 +174,7 @@ export function RegisterForm() {
               onChange={(e) =>
                 setValues((v) => ({ ...v, confirmPassword: e.target.value }))
               }
-              className="w-full rounded-lg bg-input pr-12 pl-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
+              className="w-full rounded-lg bg-input pr-12 pl-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
             />
             <button
               type="button"

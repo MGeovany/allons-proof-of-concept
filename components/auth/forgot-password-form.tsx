@@ -45,7 +45,7 @@ export function ForgotPasswordForm() {
         type="email"
         placeholder="Correo electrónico"
         required
-        className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
+        className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
       />
       {error && (
         <p className="text-center text-sm text-destructive">{error}</p>
