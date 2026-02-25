@@ -84,23 +84,33 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Contrasena"
               required
-              className="w-full rounded-lg bg-input pr-12 pl-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
+              className="w-full rounded-lg bg-input pr-10 pl-4 py-3.5 text-sm text-input-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-neutral-500 transition-colors hover:bg-neutral-200/80 hover:text-neutral-800"
               aria-label={
                 showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
               }
             >
               {showPassword ? (
-                <EyeOff className="h-6 w-6" strokeWidth={2} aria-hidden />
+                <EyeOff className="h-4 w-4" strokeWidth={2} aria-hidden />
               ) : (
-                <Eye className="h-6 w-6" strokeWidth={2} aria-hidden />
+                <Eye className="h-4 w-4" strokeWidth={2} aria-hidden />
               )}
             </button>
           </div>
+          {!asProvider && (
+            <div className="mt-1.5 flex justify-end">
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs text-muted-foreground hover:text-orange-primary hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+          )}
 
           {error && (
             <p className="text-center text-sm text-destructive">{error}</p>
@@ -110,7 +120,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full max-w-[18rem] items-center justify-center rounded-2xl bg-orange-primary py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-2xl bg-orange-primary py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loading ? "Cargando..." : asProvider ? "Entrar como proveedor" : "Continuar"}
             </button>
@@ -119,7 +129,7 @@ export function LoginForm() {
               type="button"
               onClick={handleGoogle}
               disabled={loading}
-              className="flex w-full max-w-[18rem] items-center justify-center gap-3 rounded-2xl border border-border bg-white py-3.5 text-sm font-semibold text-neutral-900 transition-opacity hover:bg-white/95 active:opacity-90 disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-border bg-white py-3.5 text-sm font-semibold text-neutral-900 transition-opacity hover:bg-white/95 active:opacity-90 disabled:opacity-50"
             >
               <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
                 <path

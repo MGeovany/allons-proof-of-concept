@@ -13,7 +13,9 @@ const CATEGORIES = [
   'Fiestas',
 ]
 
-export function CategoryChips() {
+type Props = { filterHref?: string }
+
+export function CategoryChips({ filterHref = '/home/filters' }: Props) {
   const [active, setActive] = useState<string | null>(null)
 
   return (
@@ -35,11 +37,11 @@ export function CategoryChips() {
         ))}
       </div>
       <Link
-        href="/interests?redirect=/home&from=filters"
-        className="shrink-0 rounded-lg p-1.5 text-foreground transition-colors hover:bg-secondary"
-        aria-label="Ajustar filtros - ver todos los tipos de eventos"
+        href={filterHref}
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-foreground transition-colors hover:bg-accent"
+        aria-label="Filtros por ciudad y tipo de evento"
       >
-        <SlidersHorizontal className="h-5 w-5" />
+        <SlidersHorizontal className="h-4 w-4" />
       </Link>
     </div>
   )

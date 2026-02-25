@@ -189,3 +189,87 @@ export const EVENTS: EventDetail[] = [
 export function getEventById(id: string): EventDetail | undefined {
   return EVENTS.find((e) => e.id === id)
 }
+
+/** Ciudades para filtros (multi-selección en pantalla Filtros) */
+export const FILTER_CITIES = [
+  { slug: 'tegucigalpa', label: 'Tegucigalpa' },
+  { slug: 'san-pedro-sula', label: 'San Pedro Sula' },
+  { slug: 'roatan', label: 'Roatán' },
+  { slug: 'santa-barbara', label: 'Santa Bárbara' },
+  { slug: 'santa-rosa-de-copan', label: 'Santa Rosa de Copán' },
+  { slug: 'comayagua', label: 'Comayagua' },
+  { slug: 'tela', label: 'Tela' },
+  { slug: 'la-ceiba', label: 'La Ceiba' },
+] as const
+
+/** Tipo de evento para filtros (slug → label); se matchea con tags del evento */
+export const FILTER_EVENT_TYPES = [
+  { slug: 'cine', label: 'Cine y proyecciones' },
+  { slug: 'festivales-culturales', label: 'Festivales culturales' },
+  { slug: 'arte', label: 'Exhibiciones de Arte' },
+  { slug: 'musica', label: 'Música' },
+  { slug: 'ciencia-tecnologia', label: 'Ciencia y tecnología' },
+  { slug: 'comic-con', label: 'Comic-Cons' },
+  { slug: 'conciertos', label: 'Conciertos' },
+  { slug: 'fitness', label: 'Fitness y entrenamiento' },
+  { slug: 'deportes', label: 'Partidos y torneos' },
+  { slug: 'conferencias', label: 'Conferencias' },
+  { slug: 'hackathons', label: 'Hackathons' },
+  { slug: 'catas', label: 'Catas de vino o cerveza' },
+  { slug: 'gastronomia', label: 'Festivales gastronómicos' },
+  { slug: 'raves', label: 'Raves' },
+  { slug: 'gaming', label: 'Gaming y e-sports' },
+  { slug: 'ferias', label: 'Ferias y convenciones' },
+] as const
+
+/** Slug de ciudad a partir del venue */
+export function getEventCitySlug(venue: string): string {
+  const v = venue.toLowerCase()
+  if (v.includes('san pedro sula') || v.includes('sps')) return 'san-pedro-sula'
+  if (v.includes('tegucigalpa') || v.includes('tgu')) return 'tegucigalpa'
+  if (v.includes('roatan') || v.includes('roatán')) return 'roatan'
+  if (v.includes('santa bárbara') || v.includes('santa barbara')) return 'santa-barbara'
+  if (v.includes('santa rosa') || v.includes('copán')) return 'santa-rosa-de-copan'
+  if (v.includes('comayagua')) return 'comayagua'
+  if (v.includes('tela')) return 'tela'
+  if (v.includes('la ceiba')) return 'la-ceiba'
+  return ''
+}
+
+/** Filtra eventos por uno o más slugs de ciudad (vacío = no filtrar por ciudad) */
+export function filterEventsByCities(events: EventDetail[], citySlugs: string[]): EventDetail[] {
+  const set = new Set(citySlugs.filter(Boolean))
+  if (set.size === 0) return events
+  return events.filter((e) => set.has(getEventCitySlug(e.venue)))
+}
+
+/** Slug de tipo de evento que matchea con tags del evento (normalizado) */
+function eventMatchesType(event: EventDetail, typeSlug: string): boolean {
+  const tags = event.tags.map((t) => t.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))
+  const title = event.title.toLowerCase()
+  const desc = event.description.toLowerCase()
+  const slug = typeSlug.toLowerCase()
+  if (slug === 'musica' || slug === 'conciertos') return tags.some((t) => t.includes('música') || t.includes('musica')) || title.includes('concierto') || desc.includes('concierto')
+  if (slug === 'arte') return tags.some((t) => t.includes('arte') || t.includes('pintura'))
+  if (slug === 'fitness') return tags.some((t) => t.includes('fitness') || t.includes('pilates') || t.includes('wellness'))
+  if (slug === 'deportes') return tags.some((t) => t.includes('deporte') || t.includes('running') || t.includes('torneo'))
+  if (slug === 'ferias') return tags.some((t) => t.includes('feria') || t.includes('convencion'))
+  if (slug === 'gaming') return tags.some((t) => t.includes('gaming') || t.includes('esport'))
+  if (slug === 'raves') return tags.some((t) => t.includes('rave'))
+  if (slug === 'cine') return tags.some((t) => t.includes('cine')) || desc.includes('cine') || desc.includes('proyección')
+  if (slug === 'festivales-culturales') return tags.some((t) => t.includes('cultura') || t.includes('festival'))
+  if (slug === 'ciencia-tecnologia') return tags.some((t) => t.includes('tecnología') || t.includes('vr'))
+  if (slug === 'conferencias') return desc.includes('conferencia')
+  if (slug === 'hackathons') return tags.some((t) => t.includes('hackathon')) || title.includes('hackathon')
+  if (slug === 'catas') return tags.some((t) => t.includes('cata') || t.includes('vino') || t.includes('cerveza'))
+  if (slug === 'gastronomia') return tags.some((t) => t.includes('gastronomía') || t.includes('gastronomia') || t.includes('comida'))
+  if (slug === 'comic-con') return tags.some((t) => t.includes('comic') || t.includes('con'))
+  return false
+}
+
+/** Filtra eventos por uno o más slugs de tipo (vacío = no filtrar por tipo) */
+export function filterEventsByTypes(events: EventDetail[], typeSlugs: string[]): EventDetail[] {
+  const list = typeSlugs.filter(Boolean)
+  if (list.length === 0) return events
+  return events.filter((e) => list.some((slug) => eventMatchesType(e, slug)))
+}

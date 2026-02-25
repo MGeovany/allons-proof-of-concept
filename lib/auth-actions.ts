@@ -142,3 +142,38 @@ export async function signOut() {
   await supabase.auth.signOut()
   redirect('/')
 }
+
+const getAppOrigin = () =>
+  process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL?.replace(/\/auth\/callback\/?$/, '') ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'http://localhost:3000'
+
+export async function requestPasswordReset(formData: FormData): Promise<{ error?: string; ok?: boolean }> {
+  const supabase = await createClient()
+  const email = (formData.get('email') as string)?.trim()
+  if (!email) return { error: 'Ingresa tu correo electrónico' }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${getAppOrigin()}/auth/reset-password`,
+  })
+
+  if (error) return { error: error.message }
+  return { ok: true }
+}
+
+export async function updatePassword(formData: FormData): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+
+  if (!password || password.length < 6) {
+    return { error: 'La contraseña debe tener al menos 6 caracteres' }
+  }
+  if (password !== confirmPassword) {
+    return { error: 'Las contraseñas no coinciden' }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) return { error: error.message }
+  redirect('/home')
+}
