@@ -7,7 +7,7 @@ import { getGuestsForEvent, isProvider, deleteReservationAsProvider, type GuestR
 import { getEventById } from "@/lib/events";
 import { LogOut, Users, Ticket, Trash2 } from "lucide-react";
 
-const PROVIDER_EVENT_IDS = ["3", "4", "5", "6"]; // Jeté Pilates, VR, Capital Run Fest II, Der Blitz
+const PROVIDER_EVENT_IDS = ["3", "4", "5", "6", "7", "8"]; // Jeté, VR, Capital Run Fest II, Der Blitz, Volvamos a Volar, Pintura Primitivista
 
 export default function ProviderPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
