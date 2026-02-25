@@ -15,15 +15,24 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser()
       if (user) {
-        if (isProviderEmail(user.email ?? undefined)) {
-          return NextResponse.redirect(`${origin}/provider`)
-        }
         const { data: profile } = await supabase
           .schema('event_booking')
           .from('profiles')
-          .select('interests')
+          .select('avatar_url, interests')
           .eq('id', user.id)
           .single()
+        const googleAvatar =
+          (user.user_metadata?.avatar_url as string) ?? (user.user_metadata?.picture as string)
+        if (googleAvatar && !profile?.avatar_url) {
+          await supabase
+            .schema('event_booking')
+            .from('profiles')
+            .update({ avatar_url: googleAvatar })
+            .eq('id', user.id)
+        }
+        if (isProviderEmail(user.email ?? undefined)) {
+          return NextResponse.redirect(`${origin}/provider`)
+        }
         if (!profile?.interests || profile.interests.length === 0) {
           return NextResponse.redirect(`${origin}/interests`)
         }

@@ -7,9 +7,11 @@ import { isProviderEmail } from '@/lib/provider-constants'
 
 export type GuestRow = {
   id: string
+  user_id: string
   ticket_holder_name: string | null
   quantity: number
   created_at: string
+  avatar_url: string | null
 }
 
 /**
@@ -47,17 +49,41 @@ export async function getGuestsForEvent(
   }
 
   const admin = createServiceRoleClient()
-  const { data, error } = await admin
+  const { data: rows, error } = await admin
     .schema('event_booking')
     .from('reservations')
-    .select('id, ticket_holder_name, quantity, created_at')
+    .select('id, user_id, ticket_holder_name, quantity, created_at')
     .eq('event_id', eventId)
     .order('created_at', { ascending: false })
 
   if (error) {
     return { data: null, error: error.message }
   }
-  return { data: data as GuestRow[], error: null }
+  if (!rows?.length) {
+    return { data: [] as GuestRow[], error: null }
+  }
+
+  const userIds = [...new Set((rows as { user_id: string }[]).map((r) => r.user_id))]
+  const avatarByUserId = new Map<string, string | null>()
+
+  for (const uid of userIds) {
+    const { data: { user: authUser } } = await admin.auth.admin.getUserById(uid)
+    const avatar =
+      (authUser?.user_metadata?.avatar_url as string) ??
+      (authUser?.user_metadata?.picture as string) ??
+      null
+    avatarByUserId.set(uid, avatar)
+  }
+
+  const data: GuestRow[] = (rows as { id: string; user_id: string; ticket_holder_name: string | null; quantity: number; created_at: string }[]).map((r) => ({
+    id: r.id,
+    user_id: r.user_id,
+    ticket_holder_name: r.ticket_holder_name,
+    quantity: r.quantity,
+    created_at: r.created_at,
+    avatar_url: avatarByUserId.get(r.user_id) ?? null,
+  }))
+  return { data, error: null }
 }
 
 /** Comprueba si el usuario actual es el proveedor autorizado. */

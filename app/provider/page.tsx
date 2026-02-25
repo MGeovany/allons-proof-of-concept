@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signOut } from "@/lib/auth-actions";
 import { getGuestsForEvent, isProvider, deleteReservationAsProvider, type GuestRow } from "@/lib/provider-actions";
 import { getEventById } from "@/lib/events";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, Users, Ticket, Trash2 } from "lucide-react";
 
 const PROVIDER_EVENT_IDS = ["3", "4", "5", "6", "7", "8"]; // Jeté, VR, Capital Run Fest II, Der Blitz, Volvamos a Volar, Pintura Primitivista
@@ -125,28 +126,44 @@ export default function ProviderPage() {
                       Sin reservas aún
                     </li>
                   ) : (
-                    guests.map((g) => (
-                      <li
-                        key={g.id}
-                        className="flex items-center justify-between gap-2 px-4 py-2 text-sm"
-                      >
-                        <span className="min-w-0 flex-1 text-foreground">
-                          {g.ticket_holder_name ?? "Invitado"}
-                        </span>
-                        <span className="shrink-0 rounded-md bg-orange-primary/15 px-2 py-0.5 text-xs font-medium text-orange-primary">
-                          {g.quantity} {g.quantity === 1 ? "entrada" : "entradas"}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteReservation(g.id, eventId)}
-                          disabled={deletingId === g.id}
-                          className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive disabled:opacity-50"
-                          aria-label="Eliminar reserva"
+                    guests.map((g) => {
+                      const displayName = g.ticket_holder_name ?? "Invitado";
+                      const initial = displayName.charAt(0).toUpperCase();
+                      return (
+                        <li
+                          key={g.id}
+                          className="flex items-center justify-between gap-2 px-4 py-2 text-sm"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </li>
-                    ))
+                          <div className="flex min-w-0 flex-1 items-center gap-3">
+                            <Avatar className="h-9 w-9 shrink-0">
+                              <AvatarImage
+                                src={g.avatar_url ?? undefined}
+                                alt=""
+                                unoptimized={g.avatar_url?.includes("googleusercontent")}
+                              />
+                              <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
+                                {initial}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="min-w-0 truncate text-foreground">
+                              {displayName}
+                            </span>
+                          </div>
+                          <span className="shrink-0 rounded-md bg-orange-primary/15 px-2 py-0.5 text-xs font-medium text-orange-primary">
+                            {g.quantity} {g.quantity === 1 ? "entrada" : "entradas"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteReservation(g.id, eventId)}
+                            disabled={deletingId === g.id}
+                            className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive disabled:opacity-50"
+                            aria-label="Eliminar reserva"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </li>
+                      );
+                    })
                   )}
                 </ul>
               </section>

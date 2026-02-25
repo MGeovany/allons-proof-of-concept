@@ -25,6 +25,7 @@ alter table event_booking.profiles enable row level security;
 drop policy if exists "event_booking_profiles_select_own" on event_booking.profiles;
 drop policy if exists "event_booking_profiles_insert_own" on event_booking.profiles;
 drop policy if exists "event_booking_profiles_update_own" on event_booking.profiles;
+drop policy if exists "event_booking_profiles_select_authenticated" on event_booking.profiles;
 
 create policy "event_booking_profiles_select_own"
   on event_booking.profiles for select
@@ -51,16 +52,25 @@ language plpgsql
 security definer
 set search_path = event_booking, public
 as $$
+declare
+  avatar text;
 begin
-  insert into event_booking.profiles (id, name, username)
+  avatar := coalesce(
+    new.raw_user_meta_data ->> 'avatar_url',
+    new.raw_user_meta_data ->> 'picture',
+    null
+  );
+  insert into event_booking.profiles (id, name, username, avatar_url)
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'name', null),
-    coalesce(new.raw_user_meta_data ->> 'username', null)
+    coalesce(new.raw_user_meta_data ->> 'username', null),
+    avatar
   )
   on conflict (id) do update set
     name = coalesce(excluded.name, event_booking.profiles.name),
-    username = coalesce(excluded.username, event_booking.profiles.username);
+    username = coalesce(excluded.username, event_booking.profiles.username),
+    avatar_url = coalesce(excluded.avatar_url, event_booking.profiles.avatar_url);
 
   return new;
 end;
