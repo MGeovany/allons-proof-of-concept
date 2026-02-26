@@ -3,6 +3,7 @@ import { TicketIcon } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getEventById } from "@/lib/events";
+import { claimPendingGiftsForCurrentUser } from "@/lib/tickets-actions";
 import { TicketsListAnimated } from "@/components/home/tickets-list-animated";
 
 export default async function TicketsPage() {
@@ -12,6 +13,8 @@ export default async function TicketsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/auth/login");
+
+  await claimPendingGiftsForCurrentUser();
 
   const { data: myTickets, error } = await supabase
     .schema("event_booking")

@@ -397,6 +397,52 @@ export async function redeemGiftToken(token: string): Promise<{ error?: string; 
   return { ok: true }
 }
 
+/** Reclama automáticamente entradas regaladas al correo del usuario actual (p. ej. tras crear cuenta). */
+export async function claimPendingGiftsForCurrentUser(): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return
+
+  const admin = createServiceRoleClient()
+  const emailNorm = normalizeEmail(user.email)
+
+  const { data: pending } = await admin
+    .schema('event_booking')
+    .from('reservation_tickets')
+    .select('id, event_id, recipient_email')
+    .eq('status', 'gift_pending')
+    .is('owner_user_id', null)
+
+  const toClaim = (pending ?? []).filter(
+    (t) => ((t as any).recipient_email as string)?.toLowerCase() === emailNorm,
+  )
+  if (toClaim.length === 0) return
+
+  const now = new Date().toISOString()
+  for (const t of toClaim) {
+    await admin
+      .schema('event_booking')
+      .from('reservation_tickets')
+      .update({
+        owner_user_id: user.id,
+        recipient_user_id: user.id,
+        status: 'claimed',
+        claimed_at: now,
+      })
+      .eq('id', (t as any).id)
+
+    const event = getEventById((t as any).event_id)
+    if (event && user.email) {
+      await sendTicketEmailWithQR({
+        to: user.email,
+        eventTitle: event.title,
+        ticketId: (t as any).id,
+        ticketHolderName: (user.user_metadata?.name as string) ?? 'Invitado',
+      })
+    }
+  }
+}
+
 export async function requireAuthForRedeem(nextUrl: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
