@@ -270,7 +270,7 @@ export default function ReservarPage() {
                                   runGiftCheck(slotIndex, assignment as string)
                                 }
                                 placeholder="Correo del destinatario"
-                                className="w-full rounded-lg bg-input px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-primary"
+                                className="w-full rounded-lg bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
                                 autoFocus={showEmailHere}
                               />
                               <button
@@ -383,7 +383,7 @@ export default function ReservarPage() {
                 value={friendSearch}
                 onChange={(e) => setFriendSearch(e.target.value)}
                 placeholder="Búsqueda"
-                className="w-full rounded-xl border border-border bg-input px-4 py-3 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
+                className="w-full rounded-xl border border-border bg-white px-4 py-3 pr-10 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
               />
               <Search className="absolute right-6 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             </div>

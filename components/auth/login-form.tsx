@@ -80,7 +80,7 @@ export function LoginForm() {
             type="email"
             placeholder="Correo Electronico"
             required
-            className="w-full rounded-lg bg-input px-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
+            className="w-full rounded-lg bg-white px-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
           />
           <div className="relative">
             <input
@@ -88,7 +88,7 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Contrasena"
               required
-              className="w-full rounded-lg bg-input pr-10 pl-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
+              className="w-full rounded-lg bg-white pr-10 pl-4 py-3.5 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-primary"
             />
             <button
               type="button"

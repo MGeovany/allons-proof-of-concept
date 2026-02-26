@@ -91,7 +91,7 @@ export function EditProfileForm({ profile }: { profile: ProfileForEdit | null })
               type="url"
               placeholder="https://..."
               defaultValue={avatarUrl}
-              className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-1 focus:ring-orange-primary"
+              className="mt-1.5 w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-1 focus:ring-orange-primary"
             />
           </div>
         </div>
@@ -107,7 +107,7 @@ export function EditProfileForm({ profile }: { profile: ProfileForEdit | null })
             required
             placeholder="Tu nombre"
             defaultValue={name}
-            className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-1 focus:ring-orange-primary"
+            className="mt-1.5 w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-1 focus:ring-orange-primary"
           />
         </div>
 
@@ -121,7 +121,7 @@ export function EditProfileForm({ profile }: { profile: ProfileForEdit | null })
             type="text"
             placeholder="@usuario"
             defaultValue={username}
-            className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-1 focus:ring-orange-primary"
+            className="mt-1.5 w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-1 focus:ring-orange-primary"
           />
         </div>
 
@@ -135,7 +135,7 @@ export function EditProfileForm({ profile }: { profile: ProfileForEdit | null })
             type="text"
             placeholder="Ciudad o país"
             defaultValue={location}
-            className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-1 focus:ring-orange-primary"
+            className="mt-1.5 w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-1 focus:ring-orange-primary"
           />
         </div>
 

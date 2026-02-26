@@ -57,7 +57,7 @@ export default function MessagesPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Búsqueda"
-          className="w-full rounded-xl border border-border bg-input px-4 py-3 pr-10 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
+          className="w-full rounded-xl border border-border bg-white px-4 py-3 pr-10 text-sm text-neutral-900 placeholder:text-neutral-500 focus:border-orange-primary focus:outline-none focus:ring-2 focus:ring-orange-primary/30"
         />
         <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
       </div>

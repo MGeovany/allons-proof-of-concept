@@ -93,7 +93,7 @@ export function HomeContentAnimated({ events }: Props) {
       <motion.div variants={staggerItem}>
         <Link
           href="/home/search"
-          className="relative flex w-full items-center rounded-lg bg-input px-4 py-3 pr-10 text-left text-sm text-neutral-500"
+          className="relative flex w-full items-center rounded-lg bg-white px-4 py-3 pr-10 text-left text-sm text-neutral-900 placeholder:text-neutral-500"
           aria-label="Abrir búsqueda"
         >
           <span className="text-neutral-500">Búsqueda</span>

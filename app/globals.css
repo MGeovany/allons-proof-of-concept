@@ -48,6 +48,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Inputs y textareas: siempre fondo blanco y texto negro */
+  input:not([type="hidden"]),
+  textarea {
+    @apply bg-white text-neutral-900 placeholder:text-neutral-500;
+  }
   /* Asteriscos/bullets más grandes solo cuando hay texto (el placeholder no cambia) */
   input[type='password']:not(:placeholder-shown) {
     font-size: 1.25rem;
