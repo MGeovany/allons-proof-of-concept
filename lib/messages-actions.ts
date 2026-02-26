@@ -7,6 +7,8 @@ export type ChatPreview = {
   otherUser: { id: string; name: string | null; avatar_url: string | null }
   lastMessage: string | null
   lastAt: string | null
+  /** ID del usuario que envió el último mensaje (para saber si es no leído por el actual) */
+  lastMessageSenderId: string | null
 }
 
 export type ChatMessage = {
@@ -40,7 +42,7 @@ export async function getChats(): Promise<ChatPreview[]> {
     const { data: last } = await supabase
       .schema('event_booking')
       .from('chat_messages')
-      .select('content, created_at')
+      .select('content, created_at, sender_id')
       .eq('chat_id', c.id)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -54,10 +56,39 @@ export async function getChats(): Promise<ChatPreview[]> {
       },
       lastMessage: last?.content ?? null,
       lastAt: last?.created_at ?? null,
+      lastMessageSenderId: last?.sender_id ?? null,
     })
   }
   out.sort((a, b) => (b.lastAt ?? '').localeCompare(a.lastAt ?? ''))
   return out
+}
+
+/** Cuenta de chats donde el último mensaje lo envió el otro usuario (no el actual). */
+export async function getUnreadChatsCount(): Promise<number> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 0
+
+  const { data: chats } = await supabase
+    .schema('event_booking')
+    .from('chats')
+    .select('id, user1_id, user2_id')
+    .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
+  if (!chats?.length) return 0
+
+  let count = 0
+  for (const c of chats) {
+    const { data: last } = await supabase
+      .schema('event_booking')
+      .from('chat_messages')
+      .select('sender_id')
+      .eq('chat_id', c.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+    if (last?.sender_id && last.sender_id !== user.id) count += 1
+  }
+  return count
 }
 
 export async function getOrCreateChat(otherUserId: string): Promise<{ chatId: string | null; error?: string }> {

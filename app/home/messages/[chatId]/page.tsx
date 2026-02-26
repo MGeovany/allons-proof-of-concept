@@ -4,6 +4,9 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { createClient } from "@/lib/supabase/client";
 import {
   getChatWithOther,
   getMessages,
@@ -11,6 +14,16 @@ import {
   type ChatMessage,
   type ChatWithOther,
 } from "@/lib/messages-actions";
+
+const STORAGE_KEY_READ = "chat_read_";
+
+function markChatAsRead(chatId: string, lastMessageAt: string) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(`${STORAGE_KEY_READ}${chatId}`, lastMessageAt);
+    window.dispatchEvent(new CustomEvent("chat-read"));
+  } catch {}
+}
 
 export default function ChatPage() {
   const params = useParams();
@@ -28,9 +41,57 @@ export default function ChatPage() {
     getMessages(chatId).then(setMessages);
   }, [chatId]);
 
+  // Tiempo real: suscripción a nuevos mensajes (Realtime) + polling como respaldo
+  useEffect(() => {
+    if (!chatId || !chat) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`chat:${chatId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "event_booking",
+          table: "chat_messages",
+          filter: `chat_id=eq.${chatId}`,
+        },
+        (payload) => {
+          const row = payload.new as { id: string; sender_id: string; content: string; created_at: string };
+          setMessages((prev) =>
+            prev.some((m) => m.id === row.id)
+              ? prev
+              : [...prev, { id: row.id, sender_id: row.sender_id, content: row.content, created_at: row.created_at }]
+          );
+        }
+      )
+      .subscribe();
+
+    // Respaldo: si Realtime no llega (ej. schema privado sin GRANT), actualizar cada 3s
+    const poll = setInterval(() => {
+      getMessages(chatId).then((fresh) => {
+        setMessages((prev) => {
+          if (prev.length === fresh.length && prev.every((p, i) => p.id === fresh[i]?.id)) return prev;
+          return fresh;
+        });
+      });
+    }, 3000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(poll);
+    };
+  }, [chatId, chat]);
+
   useEffect(() => {
     listRef.current?.scrollTo(0, listRef.current.scrollHeight);
   }, [messages]);
+
+  // Marcar conversación como leída al abrir y al recibir mensajes
+  useEffect(() => {
+    if (!chatId || !messages.length) return;
+    const last = messages[messages.length - 1];
+    markChatAsRead(chatId, last.created_at);
+  }, [chatId, messages]);
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
@@ -98,23 +159,31 @@ export default function ChatPage() {
         ref={listRef}
         className="flex-1 overflow-y-auto px-4 py-4"
       >
-        <div className="flex flex-col gap-2">
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              className={`flex ${m.sender_id === chat.otherUser.id ? "justify-start" : "justify-end"}`}
-            >
+        <div className="flex flex-col gap-3">
+          {messages.map((m) => {
+            const isFromOther = m.sender_id === chat.otherUser.id;
+            return (
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
-                  m.sender_id === chat.otherUser.id
-                    ? "bg-secondary text-foreground"
-                    : "bg-orange-primary text-white"
-                }`}
+                key={m.id}
+                className={`flex w-full flex-col gap-0.5 ${isFromOther ? "items-start" : "items-end"}`}
               >
-                {m.content}
+                <div
+                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+                    isFromOther
+                      ? "bg-secondary text-foreground"
+                      : "bg-orange-primary text-white"
+                  }`}
+                >
+                  {m.content}
+                </div>
+                <span
+                  className={`text-[10px] text-muted-foreground px-1 ${isFromOther ? "self-start" : "self-end"}`}
+                >
+                  {format(new Date(m.created_at), "HH:mm", { locale: es })}
+                </span>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

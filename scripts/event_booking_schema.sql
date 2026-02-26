@@ -269,6 +269,12 @@ create policy "event_booking_chat_messages_select" on event_booking.chat_message
 create policy "event_booking_chat_messages_insert" on event_booking.chat_messages for insert
   with check (sender_id = auth.uid() and exists (select 1 from event_booking.chats c where c.id = chat_id and (c.user1_id = auth.uid() or c.user2_id = auth.uid())));
 
+-- Habilitar Realtime para mensajes (ejecutar en SQL Editor si usas chat en tiempo real):
+-- 1) Añadir tabla a la publicación
+-- alter publication supabase_realtime add table event_booking.chat_messages;
+-- 2) En schemas privados, Realtime necesita SELECT para el rol del JWT (authenticated):
+-- grant select on event_booking.chat_messages to authenticated;
+
 -- Asignar rol proveedor a los correos autorizados
 update event_booking.profiles
 set role = 'provider'

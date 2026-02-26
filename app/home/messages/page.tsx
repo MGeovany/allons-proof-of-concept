@@ -5,7 +5,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Search, Users } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { getChats, type ChatPreview } from "@/lib/messages-actions";
+
+const STORAGE_KEY_READ = "chat_read_";
+
+function isUnread(chat: ChatPreview, currentUserId: string | null): boolean {
+  if (!currentUserId || !chat.lastAt || !chat.lastMessageSenderId) return false;
+  if (chat.lastMessageSenderId === currentUserId) return false;
+  try {
+    const readAt = typeof window !== "undefined" ? localStorage.getItem(`${STORAGE_KEY_READ}${chat.id}`) : null;
+    return !readAt || new Date(chat.lastAt) > new Date(readAt);
+  } catch {
+    return true;
+  }
+}
 
 const TABS = [
   { id: "todos", label: "Todos" },
@@ -20,12 +34,23 @@ export default function MessagesPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("todos");
   const [search, setSearch] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     getChats().then((data) => {
       setChats(data);
       setLoading(false);
     });
+  }, []);
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data: { user } }) => setCurrentUserId(user?.id ?? null));
+  }, []);
+
+  useEffect(() => {
+    const onRead = () => setChats((prev) => [...prev]);
+    window.addEventListener("chat-read", onRead);
+    return () => window.removeEventListener("chat-read", onRead);
   }, []);
 
   const filtered =
@@ -120,6 +145,9 @@ export default function MessagesPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-foreground">
                     {chat.otherUser.name}
+                    {isUnread(chat, currentUserId) && (
+                      <span className="ml-1.5 text-xs font-semibold text-orange-primary">New</span>
+                    )}
                   </p>
                   <p className="truncate text-sm text-muted-foreground">
                     {chat.lastMessage ?? "Sin mensajes"}
