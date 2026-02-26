@@ -40,7 +40,7 @@ export default function CodigoAccesoPage() {
         type: "png",
         margin: 2,
         width: 400,
-        color: { dark: "#FFFFFF", light: "rgba(0,0,0,0)" },
+        color: { dark: "#FFFFFF", light: "#ea580c" },
       });
       if (!cancelled) setQrUrl(dataUrl);
     }
