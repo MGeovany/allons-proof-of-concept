@@ -9,6 +9,7 @@ export default function ReservarSuccessPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const emailSent = searchParams.get("sent") === "1";
+  const invited = Number(searchParams.get("invited") ?? "0") || 0;
   const event = getEventById(params.id as string);
 
   if (!event) {
@@ -44,6 +45,11 @@ export default function ReservarSuccessPage() {
       ) : (
         <p className="mt-3 text-center text-sm text-muted-foreground">
           No pudimos enviar el correo con el QR. Puedes ver tu código aquí abajo.
+        </p>
+      )}
+      {invited > 0 && (
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Enviamos {invited} invitación{invited !== 1 ? "es" : ""} para redimir entradas de regalo.
         </p>
       )}
       <p className="mt-1 text-center text-sm text-muted-foreground">

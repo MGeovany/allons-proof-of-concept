@@ -15,6 +15,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered") === "1";
   const asProvider = searchParams.get("as") === "provider";
+  const next = searchParams.get("next") ?? "";
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
@@ -31,7 +32,7 @@ export function LoginForm() {
   async function handleGoogle() {
     setLoading(true);
     setError(null);
-    const result = await loginWithGoogle();
+    const result = await loginWithGoogle(next);
     if (result?.error) {
       setError(result.error);
       setLoading(false);
@@ -71,6 +72,9 @@ export function LoginForm() {
         )}
 
         <form action={handleSubmit} className="flex w-full flex-col gap-4">
+          {!asProvider && next && (
+            <input type="hidden" name="next" value={next} />
+          )}
           <input
             name="email"
             type="email"

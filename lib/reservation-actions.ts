@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { createServiceRoleClient } from '@/lib/supabase/admin'
 import { getEventById } from '@/lib/events'
-import { sendReservationEmailWithQR } from '@/lib/send-reservation-email'
+import { sendGiftInvitationEmail, sendTicketEmailWithQR } from '@/lib/send-reservation-email'
+import { createGiftTickets, syncReservationTickets } from '@/lib/tickets-actions'
 
 /** Total de plazas reservadas para un evento (requiere service role para ver todas las reservas). */
 async function getTotalReservedForEvent(eventId: string): Promise<number> {
@@ -30,7 +31,62 @@ export type ReservationRow = {
   created_at: string
 }
 
-export async function createReservation(eventId: string, quantity: number) {
+const getAppOrigin = () =>
+  process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL?.replace(/\/auth\/callback\/?$/, '') ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'http://localhost:3000'
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** Resuelve cada destinatario (email o user id de amigo) a email. */
+async function resolveRecipientEmails(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  currentUserId: string,
+  recipients: string[],
+): Promise<{ error?: string; emails: string[] }> {
+  const emails: string[] = []
+  for (const value of recipients) {
+    const trimmed = value.trim().toLowerCase()
+    if (!trimmed) continue
+    if (UUID_REGEX.test(trimmed)) {
+      const { data: row1 } = await supabase
+        .schema('event_booking')
+        .from('friends')
+        .select('user_id')
+        .eq('user_id', currentUserId)
+        .eq('friend_id', trimmed)
+        .limit(1)
+        .maybeSingle()
+      const { data: row2 } = await supabase
+        .schema('event_booking')
+        .from('friends')
+        .select('user_id')
+        .eq('user_id', trimmed)
+        .eq('friend_id', currentUserId)
+        .limit(1)
+        .maybeSingle()
+      if (!row1 && !row2) {
+        return { error: 'Solo puedes enviar entradas a tus amigos por usuario. Agrega a la persona en Amigos primero.', emails: [] }
+      }
+      const { data: profile } = await supabase
+        .schema('event_booking')
+        .from('profiles')
+        .select('email')
+        .eq('id', trimmed)
+        .single()
+      const friendEmail = (profile as { email?: string } | null)?.email?.trim()?.toLowerCase()
+      if (!friendEmail) {
+        return { error: 'Ese amigo no tiene correo asociado. Usa la opción "Enviar a correo" e ingresa su correo.', emails: [] }
+      }
+      emails.push(friendEmail)
+    } else {
+      emails.push(trimmed)
+    }
+  }
+  return { emails }
+}
+
+export async function createReservation(eventId: string, quantity: number, giftRecipientEmails?: string[]) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -72,28 +128,86 @@ export async function createReservation(eventId: string, quantity: number) {
       },
       { onConflict: 'user_id,event_id' },
     )
-    .select('id, ticket_holder_name')
+    .select('id, ticket_holder_name, event_id')
     .single()
 
   if (error) return { error: error.message }
 
-  // Enviar correo con el QR (esperamos para que se envíe antes de responder)
-  let emailSent = false
-  const email = user.email
-  if (email && reservation && event) {
-    const result = await sendReservationEmailWithQR({
-      to: email,
-      eventTitle: event.title,
+  // Sincronizar tickets individuales (1 por entrada)
+  if (reservation?.id) {
+    const { error: syncErr } = await syncReservationTickets({
       reservationId: reservation.id,
-      ticketHolderName: reservation.ticket_holder_name ?? ticketHolderName ?? 'Invitado',
+      eventId,
+      quantity,
     })
-    emailSent = result.ok
+    if (syncErr) return { error: syncErr }
+  }
+
+  // Resolver destinatarios (email o user id de amigo) a emails y crear regalos
+  let resolvedEmails: string[] = []
+  if (reservation?.id && giftRecipientEmails?.length) {
+    const resolved = await resolveRecipientEmails(supabase, user.id, giftRecipientEmails)
+    if (resolved.error) return { error: resolved.error }
+    resolvedEmails = resolved.emails
+  }
+  const gifts =
+    reservation?.id && resolvedEmails.length
+      ? await createGiftTickets({
+          reservationId: reservation.id,
+          eventId,
+          recipientEmails: resolvedEmails,
+        })
+      : { gifts: [], invited: [] as string[] }
+
+  if (gifts.error) return { error: gifts.error }
+
+  // Enviar invitaciones por correo a cada destinatario
+  const giverName = ticketHolderName ?? (user.user_metadata?.name as string) ?? 'Un amigo'
+  const redeemBase = `${getAppOrigin()}/gift/redeem`
+  for (const g of gifts.gifts ?? []) {
+    const redeemUrl = `${redeemBase}/${g.token}`
+    const result = await sendGiftInvitationEmail({
+      to: g.email,
+      giverName,
+      eventTitle: event?.title ?? 'Evento',
+      redeemUrl,
+    })
     if (!result.ok) {
-      console.error('[reservation] No se pudo enviar el correo con QR:', result.error)
+      console.error('[gift] No se pudo enviar invitación:', g.email, result.error)
     }
   }
 
-  return { emailSent }
+  // Enviar correo con el QR (ticket individual del comprador si existe)
+  let emailSent = false
+  const email = user.email
+  if (email && reservation?.id && event) {
+    const { data: myTicket } = await supabase
+      .schema('event_booking')
+      .from('reservation_tickets')
+      .select('id')
+      .eq('reservation_id', reservation.id)
+      .eq('owner_user_id', user.id)
+      .eq('status', 'owned')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+
+    if (myTicket?.id) {
+      const result = await sendTicketEmailWithQR({
+        to: email,
+        eventTitle: event.title,
+        ticketId: myTicket.id,
+        ticketHolderName:
+          reservation.ticket_holder_name ?? ticketHolderName ?? 'Invitado',
+      })
+      emailSent = result.ok
+      if (!result.ok) {
+        console.error('[reservation] No se pudo enviar el correo con QR:', result.error)
+      }
+    }
+  }
+
+  return { emailSent, invited: gifts.invited ?? [] }
 }
 
 export async function getReservationForEvent(
@@ -117,8 +231,30 @@ export async function getReservationForEvent(
 }
 
 export async function hasReservationForEvent(eventId: string): Promise<boolean> {
-  const r = await getReservationForEvent(eventId)
-  return !!r
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { data: reservation } = await supabase
+    .schema('event_booking')
+    .from('reservations')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('event_id', eventId)
+    .maybeSingle()
+  if (reservation?.id) return true
+
+  const { data: ticket } = await supabase
+    .schema('event_booking')
+    .from('reservation_tickets')
+    .select('id')
+    .eq('event_id', eventId)
+    .eq('owner_user_id', user.id)
+    .limit(1)
+    .maybeSingle()
+  return !!ticket?.id
 }
 
 export async function cancelReservation(eventId: string) {

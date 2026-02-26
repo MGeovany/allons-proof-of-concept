@@ -9,6 +9,10 @@ export async function loginWithEmail(formData: FormData) {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const next = (formData.get('next') as string | null) ?? null
+  const nextPath =
+    next && next.startsWith('/') && !next.startsWith('//') ? next : null
+  const allowSkipInterests = !!nextPath && nextPath.startsWith('/gift/redeem/')
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -33,10 +37,10 @@ export async function loginWithEmail(formData: FormData) {
       .eq('id', user.id)
       .single()
     if (!profile?.interests || profile.interests.length === 0) {
-      redirect('/interests')
+      if (!allowSkipInterests) redirect('/interests')
     }
   }
-  redirect('/home')
+  redirect(nextPath ?? '/home')
 }
 
 export async function registerWithEmail(formData: FormData) {
@@ -47,6 +51,9 @@ export async function registerWithEmail(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const confirmPassword = formData.get('confirmPassword') as string
+  const next = (formData.get('next') as string | null) ?? null
+  const nextPath =
+    next && next.startsWith('/') && !next.startsWith('//') ? next : null
 
   if (password !== confirmPassword) {
     return { error: 'Las contrasenas no coinciden' }
@@ -60,9 +67,15 @@ export async function registerWithEmail(formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo:
-        process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-        `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      emailRedirectTo: (() => {
+        const base =
+          process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
+          `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+        if (!nextPath) return base
+        const url = new URL(base)
+        url.searchParams.set('next', nextPath)
+        return url.toString()
+      })(),
       data: {
         name,
         username,
@@ -74,18 +87,26 @@ export async function registerWithEmail(formData: FormData) {
     return { error: error.message }
   }
 
-  redirect('/auth/login?registered=1')
+  redirect(`/auth/login?registered=1${nextPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`)
 }
 
-export async function loginWithGoogle() {
+export async function loginWithGoogle(next?: string | null) {
   const supabase = await createClient()
+  const nextPath =
+    next && next.startsWith('/') && !next.startsWith('//') ? next : null
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo:
-        process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-        `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      redirectTo: (() => {
+        const base =
+          process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
+          `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+        if (!nextPath) return base
+        const url = new URL(base)
+        url.searchParams.set('next', nextPath)
+        return url.toString()
+      })(),
     },
   })
 
@@ -122,6 +143,7 @@ export async function saveInterests(
           interests: interests ?? [],
           name: user.user_metadata?.name ?? undefined,
           username: user.user_metadata?.username ?? undefined,
+          email: user.email ? user.email.toLowerCase() : undefined,
         },
         { onConflict: 'id' },
       )

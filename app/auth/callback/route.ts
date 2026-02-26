@@ -6,6 +6,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/home'
+  const allowSkipInterests = next.startsWith('/gift/redeem/')
 
   if (code) {
     const supabase = await createClient()
@@ -18,22 +19,22 @@ export async function GET(request: Request) {
         const { data: profile } = await supabase
           .schema('event_booking')
           .from('profiles')
-          .select('avatar_url, interests')
+          .select('avatar_url, interests, email')
           .eq('id', user.id)
           .single()
         const googleAvatar =
           (user.user_metadata?.avatar_url as string) ?? (user.user_metadata?.picture as string)
-        if (googleAvatar && !profile?.avatar_url) {
-          await supabase
-            .schema('event_booking')
-            .from('profiles')
-            .update({ avatar_url: googleAvatar })
-            .eq('id', user.id)
+        const emailLc = user.email ? user.email.toLowerCase() : null
+        const update: Record<string, string> = {}
+        if (googleAvatar && !profile?.avatar_url) update.avatar_url = googleAvatar
+        if (emailLc && !(profile as any)?.email) update.email = emailLc
+        if (Object.keys(update).length > 0) {
+          await supabase.schema('event_booking').from('profiles').update(update).eq('id', user.id)
         }
         if (isProviderEmail(user.email ?? undefined)) {
           return NextResponse.redirect(`${origin}/provider`)
         }
-        if (!profile?.interests || profile.interests.length === 0) {
+        if (!allowSkipInterests && (!profile?.interests || profile.interests.length === 0)) {
           return NextResponse.redirect(`${origin}/interests`)
         }
       }

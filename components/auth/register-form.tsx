@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { registerWithEmail, loginWithGoogle } from "@/lib/auth-actions";
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 
@@ -10,6 +11,8 @@ const MIN_NAME_LENGTH = 2;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function RegisterForm() {
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") ?? "";
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -77,7 +80,7 @@ export function RegisterForm() {
   async function handleGoogle() {
     setLoading(true);
     setError(null);
-    const result = await loginWithGoogle();
+    const result = await loginWithGoogle(next);
     if (result?.error) {
       setError(result.error);
       setLoading(false);
@@ -106,6 +109,7 @@ export function RegisterForm() {
         </div>
 
         <form action={handleSubmit} className="flex w-full flex-col gap-3.5">
+          {next && <input type="hidden" name="next" value={next} />}
           <input
             name="name"
             type="text"

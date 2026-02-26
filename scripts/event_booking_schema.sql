@@ -54,23 +54,27 @@ set search_path = event_booking, public
 as $$
 declare
   avatar text;
+  email_lc text;
 begin
   avatar := coalesce(
     new.raw_user_meta_data ->> 'avatar_url',
     new.raw_user_meta_data ->> 'picture',
     null
   );
-  insert into event_booking.profiles (id, name, username, avatar_url)
+  email_lc := case when new.email is null then null else lower(new.email) end;
+  insert into event_booking.profiles (id, name, username, avatar_url, email)
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'name', null),
     coalesce(new.raw_user_meta_data ->> 'username', null),
-    avatar
+    avatar,
+    email_lc
   )
   on conflict (id) do update set
     name = coalesce(excluded.name, event_booking.profiles.name),
     username = coalesce(excluded.username, event_booking.profiles.username),
-    avatar_url = coalesce(excluded.avatar_url, event_booking.profiles.avatar_url);
+    avatar_url = coalesce(excluded.avatar_url, event_booking.profiles.avatar_url),
+    email = coalesce(excluded.email, event_booking.profiles.email);
 
   return new;
 end;
@@ -117,6 +121,62 @@ create policy "event_booking_reservations_delete_own"
   on event_booking.reservations for delete
   using (auth.uid() = user_id);
 
+-- Tickets individuales por reserva (1 fila = 1 entrada, permite regalar/redimir)
+create table if not exists event_booking.reservation_tickets (
+  id uuid primary key default gen_random_uuid(),
+  reservation_id uuid not null references event_booking.reservations(id) on delete cascade,
+  event_id text not null,
+  purchaser_id uuid not null references auth.users(id) on delete cascade,
+  owner_user_id uuid references auth.users(id) on delete set null,
+  recipient_user_id uuid references auth.users(id) on delete set null,
+  recipient_email text,
+  status text not null default 'owned' check (status in ('owned', 'gift_pending', 'claimed')),
+  gift_token uuid unique,
+  gifted_at timestamptz,
+  claimed_at timestamptz,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_reservation_tickets_reservation_id
+  on event_booking.reservation_tickets(reservation_id);
+create index if not exists idx_reservation_tickets_event_id
+  on event_booking.reservation_tickets(event_id);
+create index if not exists idx_reservation_tickets_owner_user_id
+  on event_booking.reservation_tickets(owner_user_id) where owner_user_id is not null;
+create index if not exists idx_reservation_tickets_purchaser_id
+  on event_booking.reservation_tickets(purchaser_id);
+create index if not exists idx_reservation_tickets_recipient_user_id
+  on event_booking.reservation_tickets(recipient_user_id) where recipient_user_id is not null;
+create index if not exists idx_reservation_tickets_gift_token
+  on event_booking.reservation_tickets(gift_token) where gift_token is not null;
+create index if not exists idx_reservation_tickets_recipient_email
+  on event_booking.reservation_tickets(recipient_email) where recipient_email is not null;
+
+alter table event_booking.reservation_tickets enable row level security;
+
+drop policy if exists "event_booking_reservation_tickets_select" on event_booking.reservation_tickets;
+drop policy if exists "event_booking_reservation_tickets_insert" on event_booking.reservation_tickets;
+drop policy if exists "event_booking_reservation_tickets_update" on event_booking.reservation_tickets;
+
+create policy "event_booking_reservation_tickets_select"
+  on event_booking.reservation_tickets for select
+  using (
+    auth.uid() = purchaser_id
+    or auth.uid() = owner_user_id
+    or auth.uid() = recipient_user_id
+  );
+
+create policy "event_booking_reservation_tickets_insert"
+  on event_booking.reservation_tickets for insert
+  with check (auth.uid() = purchaser_id);
+
+create policy "event_booking_reservation_tickets_update"
+  on event_booking.reservation_tickets for update
+  using (
+    auth.uid() = purchaser_id
+    or (auth.uid() = recipient_user_id and status = 'gift_pending')
+  );
+
 -- Exponer el schema en la API (evita "Invalid schema: event_booking")
 -- Ver también: Dashboard → Project Settings → API → Exposed schemas → añadir "event_booking"
 grant usage on schema event_booking to anon, authenticated, service_role;
@@ -136,6 +196,30 @@ alter table event_booking.profiles add column if not exists interests text[] def
 alter table event_booking.profiles add column if not exists role text default 'user';
 alter table event_booking.profiles add column if not exists avatar_url text;
 alter table event_booking.profiles add column if not exists location text;
+alter table event_booking.profiles add column if not exists email text;
+
+-- Email de perfiles (para buscar usuarios por correo al regalar tickets)
+create unique index if not exists idx_event_booking_profiles_email
+  on event_booking.profiles(email)
+  where email is not null;
+
+-- Backfill de email desde auth.users (ejecutar en SQL Editor con permisos)
+update event_booking.profiles p
+set email = lower(u.email)
+from auth.users u
+where u.id = p.id and p.email is null and u.email is not null;
+
+-- Backfill de tickets existentes (1 fila por entrada), idempotente
+insert into event_booking.reservation_tickets (reservation_id, event_id, purchaser_id, owner_user_id, status)
+select r.id, r.event_id, r.user_id, r.user_id, 'owned'
+from event_booking.reservations r
+join lateral (
+  select greatest(
+    r.quantity - coalesce((select count(*) from event_booking.reservation_tickets t where t.reservation_id = r.id), 0),
+    0
+  ) as missing
+) m on true
+join lateral generate_series(1, m.missing) gs(i) on true;
 
 -- Amigos: relación bidireccional (user_id añadió a friend_id; ambos se ven como amigos)
 create table if not exists event_booking.friends (
