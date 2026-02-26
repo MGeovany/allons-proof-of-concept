@@ -202,11 +202,11 @@ export function RegisterForm() {
             <p className="text-center text-sm text-destructive">{error}</p>
           )}
 
-          <div className="flex flex-col items-center gap-2 pt-4">
+          <div className="flex w-full flex-col gap-2 pt-4">
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full max-w-[18rem] items-center justify-center rounded-2xl bg-orange-primary py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-2xl bg-orange-primary py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loading ? "Cargando..." : "Continuar"}
             </button>
@@ -214,7 +214,7 @@ export function RegisterForm() {
               type="button"
               onClick={handleGoogle}
               disabled={loading}
-              className="flex w-full max-w-[18rem] items-center justify-center gap-3 rounded-2xl border border-border bg-white py-3.5 text-sm font-semibold text-neutral-900 transition-opacity hover:bg-white/95 active:opacity-90 disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-border bg-white py-3.5 text-sm font-semibold text-neutral-900 transition-opacity hover:bg-white/95 active:opacity-90 disabled:opacity-50"
             >
               <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
                 <path

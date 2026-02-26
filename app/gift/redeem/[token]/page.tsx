@@ -6,9 +6,28 @@ import { RedeemGiftCard } from '@/components/gift/redeem-gift-card'
 export default async function RedeemGiftPage({
   params,
 }: {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }) {
-  const { token } = params
+  const { token } = await params
+  if (!token || typeof token !== 'string') {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center bg-background px-6">
+        <h1 className="text-center text-xl font-bold text-foreground">
+          Enlace inválido
+        </h1>
+        <p className="mt-3 text-center text-sm text-muted-foreground">
+          Falta el identificador del regalo.
+        </p>
+        <Link
+          href="/"
+          className="mt-8 rounded-2xl bg-orange-primary px-8 py-3 text-sm font-semibold text-white"
+        >
+          Ir al inicio
+        </Link>
+      </main>
+    )
+  }
+
   const supabase = await createClient()
   const {
     data: { user },
