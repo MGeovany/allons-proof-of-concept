@@ -157,7 +157,7 @@ export default function ChatPage() {
 
       <div
         ref={listRef}
-        className="flex-1 overflow-y-auto px-4 py-4"
+        className="flex-1 overflow-y-auto scrollbar-none px-4 py-4"
       >
         <div className="flex flex-col gap-3">
           {messages.map((m) => {
