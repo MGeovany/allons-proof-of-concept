@@ -5,6 +5,7 @@ import { createServiceRoleClient } from '@/lib/supabase/admin'
 import { getEventById } from '@/lib/events'
 import { sendGiftInvitationEmail, sendTicketEmailWithQR } from '@/lib/send-reservation-email'
 import { createGiftTickets, syncReservationTickets } from '@/lib/tickets-actions'
+import { getAppOrigin } from '@/lib/app-origin'
 
 /** Total de plazas reservadas para un evento (requiere service role para ver todas las reservas). */
 async function getTotalReservedForEvent(eventId: string): Promise<number> {
@@ -30,11 +31,6 @@ export type ReservationRow = {
   ticket_holder_name: string | null
   created_at: string
 }
-
-const getAppOrigin = () =>
-  process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL?.replace(/\/auth\/callback\/?$/, '') ||
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  'http://localhost:3000'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 

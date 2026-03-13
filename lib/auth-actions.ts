@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { isProviderEmail } from '@/lib/provider-constants'
+import { getAppOrigin } from '@/lib/app-origin'
 
 export async function loginWithEmail(formData: FormData) {
   const supabase = await createClient()
@@ -68,9 +69,7 @@ export async function registerWithEmail(formData: FormData) {
     password,
     options: {
       emailRedirectTo: (() => {
-        const base =
-          process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-          `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+        const base = `${getAppOrigin()}/auth/callback`
         if (!nextPath) return base
         const url = new URL(base)
         url.searchParams.set('next', nextPath)
@@ -99,9 +98,7 @@ export async function loginWithGoogle(next?: string | null) {
     provider: 'google',
     options: {
       redirectTo: (() => {
-        const base =
-          process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-          `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+        const base = `${getAppOrigin()}/auth/callback`
         if (!nextPath) return base
         const url = new URL(base)
         url.searchParams.set('next', nextPath)
@@ -164,11 +161,6 @@ export async function signOut() {
   await supabase.auth.signOut()
   redirect('/')
 }
-
-const getAppOrigin = () =>
-  process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL?.replace(/\/auth\/callback\/?$/, '') ||
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  'http://localhost:3000'
 
 export async function requestPasswordReset(formData: FormData): Promise<{ error?: string; ok?: boolean }> {
   const supabase = await createClient()
